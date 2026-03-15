@@ -1,3 +1,5 @@
+import './index.css';
+
 interface Post {
   id: string;
   title: string;

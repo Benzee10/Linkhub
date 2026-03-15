@@ -1,3 +1,5 @@
+import './index.css';
+
 interface Group {
   name: string;
   description: string;
