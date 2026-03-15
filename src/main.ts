@@ -43,7 +43,7 @@ function createPostCard(post: Post) {
         ${post.description}
       </p>
       <a 
-        href="/post.html?id=${post.id}" 
+        href="/post?id=${post.id}" 
         class="inline-flex items-center justify-between w-full py-4 px-6 rounded-2xl bg-slate-50 text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-all duration-300 group/btn"
       >
         <span>Explore Groups</span>
