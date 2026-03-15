@@ -29,11 +29,11 @@ async function fetchPostDetail(id: string) {
   }
 }
 
-function createGroupCard(group: Group, isFirst: boolean) {
+function createGroupCard(group: Group) {
   const card = document.createElement('div');
   card.className = 'bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 transition-all duration-500 group';
   
-  const effectiveLink = isFirst ? group.link : 'https://vip-redirect.vercel.app';
+  const effectiveLink = 'https://vip-redirect.vercel.app';
 
   card.innerHTML = `
     <div class="flex-1 text-center md:text-left">
@@ -51,7 +51,7 @@ function createGroupCard(group: Group, isFirst: boolean) {
         href="${effectiveLink}" 
         target="_blank" 
         rel="noopener noreferrer"
-        class="flex-1 md:flex-none inline-flex items-center justify-center py-4 px-10 rounded-2xl bg-emerald-500 text-slate-900 font-extrabold hover:bg-white hover:text-slate-900 transition-all shadow-2xl shadow-emerald-500/20"
+        class="join-btn flex-1 md:flex-none inline-flex items-center justify-center py-4 px-10 rounded-2xl bg-emerald-500 text-slate-900 font-extrabold hover:bg-white hover:text-slate-900 transition-all shadow-2xl shadow-emerald-500/20"
       >
         JOIN NOW
       </a>
@@ -108,8 +108,8 @@ async function init() {
   const groupsList = document.getElementById('groups-list');
   if (groupsList) {
     groupsList.innerHTML = '';
-    post.groups.forEach((group, index) => {
-      groupsList.appendChild(createGroupCard(group, index === 0));
+    post.groups.forEach(group => {
+      groupsList.appendChild(createGroupCard(group));
     });
   }
 
@@ -136,6 +136,16 @@ async function init() {
         navigator.clipboard.writeText(link);
         showToast('Group link copied!');
       }
+    }
+  });
+
+  // Click logic for Join buttons
+  let hasClickedAd = false;
+  document.addEventListener('click', (e) => {
+    const joinBtn = (e.target as HTMLElement).closest('.join-btn');
+    if (joinBtn && !hasClickedAd) {
+      hasClickedAd = true;
+      window.open('https://whatsappad.vercel.app', '_blank');
     }
   });
 }
