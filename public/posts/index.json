@@ -19,5 +19,12 @@
     "description": "Navigate the London dating scene with these exclusive community links.",
     "image": "https://picsum.photos/seed/london-singles/800/600",
     "category": "Local Groups"
+  },
+  {
+    "id": "ghana-nigeria-adult",
+    "title": "Ghana and Nigeria Adult WhatsApp Group Links",
+    "description": "A curated collection of adult communities for users in Ghana and Nigeria.",
+    "image": "https://picsum.photos/seed/ghana-nigeria/800/600",
+    "category": "Adult Groups"
   }
 ]
