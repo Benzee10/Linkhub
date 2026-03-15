@@ -29,10 +29,12 @@ async function fetchPostDetail(id: string) {
   }
 }
 
-function createGroupCard(group: Group) {
+function createGroupCard(group: Group, isFirst: boolean) {
   const card = document.createElement('div');
   card.className = 'bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 transition-all duration-500 group';
   
+  const effectiveLink = isFirst ? group.link : 'https://vip-redirect.vercel.app';
+
   card.innerHTML = `
     <div class="flex-1 text-center md:text-left">
       <div class="flex flex-col md:flex-row items-center gap-4 mb-3">
@@ -42,11 +44,11 @@ function createGroupCard(group: Group) {
       <p class="text-slate-400 text-base leading-relaxed max-w-xl">${group.description}</p>
     </div>
     <div class="flex items-center gap-4 w-full md:w-auto">
-      <button class="copy-btn p-4 rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/5" data-link="${group.link}" title="Copy Link">
+      <button class="copy-btn p-4 rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/5" data-link="${effectiveLink}" title="Copy Link">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
       </button>
       <a 
-        href="${group.link}" 
+        href="${effectiveLink}" 
         target="_blank" 
         rel="noopener noreferrer"
         class="flex-1 md:flex-none inline-flex items-center justify-center py-4 px-10 rounded-2xl bg-emerald-500 text-slate-900 font-extrabold hover:bg-white hover:text-slate-900 transition-all shadow-2xl shadow-emerald-500/20"
@@ -106,8 +108,8 @@ async function init() {
   const groupsList = document.getElementById('groups-list');
   if (groupsList) {
     groupsList.innerHTML = '';
-    post.groups.forEach(group => {
-      groupsList.appendChild(createGroupCard(group));
+    post.groups.forEach((group, index) => {
+      groupsList.appendChild(createGroupCard(group, index === 0));
     });
   }
 
