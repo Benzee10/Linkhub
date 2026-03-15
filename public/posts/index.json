@@ -1,0 +1,23 @@
+[
+  {
+    "id": "south-africa-singles",
+    "title": "Single Girls in South Africa",
+    "description": "Connect with vibrant singles across Johannesburg, Cape Town, and Durban.",
+    "image": "https://picsum.photos/seed/sa-singles/800/600",
+    "category": "Dating"
+  },
+  {
+    "id": "nigeria-dating",
+    "title": "Dating Groups in Nigeria",
+    "description": "The ultimate directory for finding love and friendship in Lagos, Abuja, and beyond.",
+    "image": "https://picsum.photos/seed/nigeria-dating/800/600",
+    "category": "Dating"
+  },
+  {
+    "id": "london-singles",
+    "title": "Singles in London WhatsApp Groups",
+    "description": "Navigate the London dating scene with these exclusive community links.",
+    "image": "https://picsum.photos/seed/london-singles/800/600",
+    "category": "Local Groups"
+  }
+]

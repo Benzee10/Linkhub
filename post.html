@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkHub | Post Details</title>
+    <meta name="description" content="View WhatsApp group links and join communities." />
+    <!-- Open Graph -->
+    <meta property="og:title" content="LinkHub | Post Details" />
+    <meta property="og:description" content="Join high-quality WhatsApp groups." />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="https://picsum.photos/seed/linkhub/1200/630" />
+  </head>
+  <body class="bg-[#F8FAFC] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-slate-200/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+          <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200 group-hover:bg-emerald-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            </div>
+            <span class="text-2xl font-extrabold tracking-tight text-slate-900 font-display">LinkHub</span>
+          </a>
+          <div class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-500">
+            <button id="share-btn" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-200 hover:border-slate-900 hover:text-slate-900 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+              Share Directory
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Post Header -->
+    <header id="post-header" class="pt-20 pb-24 lg:pt-32 lg:pb-40">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div id="post-category" class="inline-block px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-[0.2em] mb-8">Loading...</div>
+        <h1 id="post-title" class="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 font-display leading-tight">Loading Post...</h1>
+        <p id="post-description" class="text-xl lg:text-2xl text-slate-500 leading-relaxed mb-16 max-w-3xl mx-auto">Please wait while we fetch the details.</p>
+        
+        <div class="relative group">
+          <div class="absolute -inset-4 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-[3rem] blur-2xl opacity-50"></div>
+          <div class="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 mb-20 border-8 border-white">
+            <img id="post-image" src="https://picsum.photos/seed/loading/1200/630" alt="Featured Image" class="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          </div>
+        </div>
+
+        <div class="max-w-2xl mx-auto text-left">
+          <div class="prose prose-slate prose-lg lg:prose-xl max-w-none">
+            <p id="post-intro" class="text-2xl font-bold text-slate-900 mb-8 leading-snug"></p>
+            <div id="post-content" class="text-slate-500 leading-relaxed space-y-6"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Groups Section -->
+    <section class="py-32 bg-slate-900 relative overflow-hidden">
+      <div class="absolute inset-0 opacity-10 grid-bg"></div>
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8 mb-20">
+          <div>
+            <h2 class="text-4xl lg:text-5xl font-extrabold text-white font-display mb-4">Join the Conversation</h2>
+            <p class="text-slate-400 text-lg">Select a group below to join instantly via WhatsApp.</p>
+          </div>
+          <span id="group-count" class="px-6 py-2 rounded-full bg-white/10 backdrop-blur-md text-emerald-400 text-sm font-bold border border-white/10">0 Groups Available</span>
+        </div>
+
+        <div id="groups-list" class="grid grid-cols-1 gap-8">
+          <!-- Group Cards will be injected here -->
+          <div class="animate-pulse bg-white/5 rounded-[2rem] border border-white/10 p-10 h-32"></div>
+          <div class="animate-pulse bg-white/5 rounded-[2rem] border border-white/10 p-10 h-32"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 pt-16 pb-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+          <p>&copy; 2026 LinkHub Directory. All rights reserved.</p>
+          <div class="flex gap-6">
+            <a href="/" class="hover:text-emerald-600 transition-colors">Home</a>
+            <a href="#" class="hover:text-emerald-600 transition-colors">Privacy</a>
+            <a href="#" class="hover:text-emerald-600 transition-colors">Terms</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl transform translate-y-32 transition-transform duration-300 z-[100] flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="toast-message">Link copied to clipboard!</span>
+    </div>
+
+    <script type="module" src="/src/post.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "id": "london-singles",
+  "title": "Singles in London WhatsApp Groups",
+  "description": "Navigate the London dating scene with these exclusive community links.",
+  "image": "https://picsum.photos/seed/london-singles/800/600",
+  "category": "Local Groups",
+  "intro": "London can be a lonely place despite its millions of residents. Finding your tribe is essential for a happy city life.",
+  "content": "Our London-focused groups are divided by interests and boroughs to help you find people nearby. These groups often organize real-world meetups, pub crawls, and cultural outings. Join in and start making the most of what London has to offer.",
+  "groups": [
+    {
+      "name": "Central London Mixers",
+      "description": "After-work drinks and social events in the West End.",
+      "members": "200+",
+      "link": "https://chat.whatsapp.com/example9"
+    },
+    {
+      "name": "East London Creatives",
+      "description": "For singles in Shoreditch, Hackney, and beyond.",
+      "members": "130",
+      "link": "https://chat.whatsapp.com/example10"
+    }
+  ]
+}
