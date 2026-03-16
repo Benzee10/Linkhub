@@ -7,6 +7,7 @@ interface Post {
   description: string;
   image: string;
   category: string;
+  keywords?: string[];
 }
 
 async function fetchPosts() {
@@ -75,8 +76,12 @@ async function init() {
     
     const filteredPosts = allPosts.filter(post => {
       const matchesCategory = currentCategory === 'All' || post.category === currentCategory;
-      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           post.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = post.title.toLowerCase().includes(searchLower) || 
+                           post.description.toLowerCase().includes(searchLower) ||
+                           (post.keywords && post.keywords.some(k => k.toLowerCase().includes(searchLower)));
+      
       return matchesCategory && matchesSearch;
     });
 
@@ -108,6 +113,10 @@ async function init() {
   // Search event
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value;
+    renderPosts();
+  });
+
+  document.getElementById('search-button')?.addEventListener('click', () => {
     renderPosts();
   });
 
