@@ -1,0 +1,29 @@
+{
+  "id": "premium-hookups-vip",
+  "title": "Premium Hookups VIP WhatsApp Groups",
+  "description": "Exclusive VIP groups for premium hookups and private meetings.",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
+  "category": "Adult Groups",
+  "intro": "Welcome to the Premium Hookups VIP WhatsApp Groups. Join these exclusive VIP communities for premium hookups and private meetings.",
+  "content": "Our directory provides the most active and high-quality VIP WhatsApp group links for adults. Whether you are looking for dating, hookups, or just fun conversations, we have the right group for you.\n\nAll groups are moderated to ensure a safe and enjoyable environment for all members. Please respect the group rules and other members.",
+  "groups": [
+    {
+      "name": "VIP Hookup Hub",
+      "description": "Exclusive hookups for premium members.",
+      "members": "5K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Private VIP Meetings",
+      "description": "Private meetings and hookups for VIPs.",
+      "members": "2K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Premium VIP Chat",
+      "description": "Vibrant adult conversations for premium members.",
+      "members": "10K+",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "private-content-hub",
+  "title": "Private Content Hub WhatsApp Groups",
+  "description": "Access exclusive adult content in these private WhatsApp group links.",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
+  "category": "Adult Groups",
+  "intro": "Welcome to the Private Content Hub WhatsApp Groups. Access exclusive adult content in these private WhatsApp group links.",
+  "content": "Our directory provides the most active and high-quality private WhatsApp group links for adults. Whether you are looking for dating, hookups, or just fun conversations, we have the right group for you.\n\nAll groups are moderated to ensure a safe and enjoyable environment for all members. Please respect the group rules and other members.",
+  "groups": [
+    {
+      "name": "Private Content Hub",
+      "description": "Exclusive content for premium members.",
+      "members": "15K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Exclusive Content VIP",
+      "description": "Private meetings and hookups for content members.",
+      "members": "7K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Premium Content Chat",
+      "description": "Vibrant adult conversations for content members.",
+      "members": "30K+",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}

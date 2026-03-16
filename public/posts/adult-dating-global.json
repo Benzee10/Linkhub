@@ -1,0 +1,29 @@
+{
+  "id": "adult-dating-global",
+  "title": "Global Adult Dating WhatsApp Groups",
+  "description": "Join international dating groups to meet people from all over the world.",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
+  "category": "Adult Groups",
+  "intro": "Welcome to the Global Adult Dating WhatsApp Groups. Join these international communities to meet people from all over the world.",
+  "content": "Our directory provides the most active and high-quality international WhatsApp group links for adults. Whether you are looking for dating, hookups, or just fun conversations, we have the right group for you.\n\nAll groups are moderated to ensure a safe and enjoyable environment for all members. Please respect the group rules and other members.",
+  "groups": [
+    {
+      "name": "International Dating Hub",
+      "description": "Exclusive dating for premium members worldwide.",
+      "members": "20K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Global Hookups",
+      "description": "Private meetings and hookups globally.",
+      "members": "10K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "World Adult Chat",
+      "description": "Vibrant adult conversations from every continent.",
+      "members": "50K+",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}

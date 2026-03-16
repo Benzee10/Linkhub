@@ -1,0 +1,29 @@
+{
+  "id": "malawi-girls",
+  "title": "Malawi Girls WhatsApp Group Links",
+  "description": "Join vibrant Malawian communities for dating and networking.",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
+  "category": "Adult Groups",
+  "intro": "Welcome to the best Malawi Girls WhatsApp Group Links. Join these exclusive communities to meet new people and share experiences.",
+  "content": "Our directory provides the most active and high-quality WhatsApp group links for adults in Malawi. Whether you are looking for dating, hookups, or just fun conversations, we have the right group for you.\n\nAll groups are moderated to ensure a safe and enjoyable environment for all members. Please respect the group rules and other members.",
+  "groups": [
+    {
+      "name": "Lilongwe Dating Hub",
+      "description": "Exclusive dating for premium members in Lilongwe.",
+      "members": "3K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Blantyre Hookups",
+      "description": "Private meetings and hookups in Blantyre.",
+      "members": "1K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Malawi Adult Chat",
+      "description": "Vibrant adult conversations across Malawi.",
+      "members": "7K+",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}

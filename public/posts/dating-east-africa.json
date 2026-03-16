@@ -1,0 +1,29 @@
+{
+  "id": "dating-east-africa",
+  "title": "East Africa Dating WhatsApp Groups",
+  "description": "Connect with singles across East Africa in these dating groups.",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
+  "category": "Adult Groups",
+  "intro": "Welcome to the East Africa Dating WhatsApp Groups. Join these exclusive communities to meet new people and share experiences.",
+  "content": "Our directory provides the most active and high-quality WhatsApp group links for adults in East Africa. Whether you are looking for dating, hookups, or just fun conversations, we have the right group for you.\n\nAll groups are moderated to ensure a safe and enjoyable environment for all members. Please respect the group rules and other members.",
+  "groups": [
+    {
+      "name": "East Africa Dating Hub",
+      "description": "Exclusive dating for premium members in East Africa.",
+      "members": "8K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "East Africa Hookups",
+      "description": "Private meetings and hookups in East Africa.",
+      "members": "4K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "East Africa Adult Chat",
+      "description": "Vibrant adult conversations across East Africa.",
+      "members": "15K+",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}

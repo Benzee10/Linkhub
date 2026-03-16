@@ -1,0 +1,29 @@
+{
+  "id": "botswana-girls",
+  "title": "Botswana Girls WhatsApp Group Links",
+  "description": "Join Botswana WhatsApp groups for adult chat and dating.",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
+  "category": "Adult Groups",
+  "intro": "Welcome to the best Botswana Girls WhatsApp Group Links. Join these exclusive communities to meet new people and share experiences.",
+  "content": "Our directory provides the most active and high-quality WhatsApp group links for adults in Botswana. Whether you are looking for dating, hookups, or just fun conversations, we have the right group for you.\n\nAll groups are moderated to ensure a safe and enjoyable environment for all members. Please respect the group rules and other members.",
+  "groups": [
+    {
+      "name": "Gaborone Dating Hub",
+      "description": "Exclusive dating for premium members in Gaborone.",
+      "members": "3K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Francistown Hookups",
+      "description": "Private meetings and hookups in Francistown.",
+      "members": "1K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Botswana Adult Chat",
+      "description": "Vibrant adult conversations across Botswana.",
+      "members": "6K+",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}
