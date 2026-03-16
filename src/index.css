@@ -14,24 +14,32 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  
+  body {
+    @apply transition-colors duration-300;
+  }
 }
 
 @layer components {
   .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-xl;
   }
   
   .premium-card {
-    @apply bg-white rounded-[2rem] border border-slate-100 p-6 transition-all duration-500 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] hover:-translate-y-2;
+    @apply bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 transition-all duration-500 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] hover:-translate-y-2;
   }
 
   .btn-primary {
-    @apply relative overflow-hidden bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:bg-emerald-600 hover:shadow-2xl hover:shadow-emerald-500/20 active:scale-95;
+    @apply relative overflow-hidden bg-slate-900 dark:bg-emerald-600 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:bg-emerald-600 dark:hover:bg-emerald-500 hover:shadow-2xl hover:shadow-emerald-500/20 active:scale-95;
   }
 
   .grid-bg {
     background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.03) 1px, transparent 0);
     background-size: 40px 40px;
+  }
+  
+  .dark .grid-bg {
+    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
   }
 }
 

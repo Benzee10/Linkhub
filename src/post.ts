@@ -1,4 +1,5 @@
 import './index.css';
+import { initTheme } from './theme';
 
 interface Group {
   name: string;
@@ -21,7 +22,10 @@ interface PostDetail {
 async function fetchPostDetail(id: string) {
   try {
     const response = await fetch(`/posts/${id}.json`);
-    if (!response.ok) throw new Error('Post not found');
+    if (!response.ok) {
+      console.error(`Post fetch failed: ${response.status} ${response.statusText}`);
+      throw new Error('Post not found');
+    }
     return await response.json() as PostDetail;
   } catch (error) {
     console.error('Error fetching post detail:', error);
@@ -31,7 +35,7 @@ async function fetchPostDetail(id: string) {
 
 function createGroupCard(group: Group) {
   const card = document.createElement('div');
-  card.className = 'bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 transition-all duration-500 group';
+  card.className = 'bg-white/5 dark:bg-slate-800/50 backdrop-blur-xl border border-white/10 dark:border-slate-700/50 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 dark:hover:bg-slate-800 transition-all duration-500 group';
   
   const effectiveLink = 'https://vip-redirect.vercel.app';
 
@@ -41,10 +45,10 @@ function createGroupCard(group: Group) {
         <h3 class="text-2xl font-bold text-white font-display">${group.name}</h3>
         ${group.members ? `<span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">${group.members} Members</span>` : ''}
       </div>
-      <p class="text-slate-400 text-base leading-relaxed max-w-xl">${group.description}</p>
+      <p class="text-slate-400 dark:text-slate-300 text-base leading-relaxed max-w-xl">${group.description}</p>
     </div>
     <div class="flex items-center gap-4 w-full md:w-auto">
-      <button class="copy-btn p-4 rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/5" data-link="${effectiveLink}" title="Copy Link">
+      <button class="copy-btn p-4 rounded-2xl bg-white/5 dark:bg-slate-700/50 text-slate-400 hover:text-white hover:bg-white/10 dark:hover:bg-slate-700 transition-all border border-white/5 dark:border-slate-700" data-link="${effectiveLink}" title="Copy Link">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
       </button>
       <a 
@@ -86,6 +90,7 @@ async function init() {
   }
 
   const post = await fetchPostDetail(postId);
+  initTheme();
   
   if (!post) {
     document.body.innerHTML = '<div class="flex items-center justify-center h-screen"><div class="text-center"><h1 class="text-2xl font-bold mb-4">Post not found</h1><a href="/" class="text-emerald-600 underline">Return Home</a></div></div>';
@@ -94,16 +99,26 @@ async function init() {
 
   // Update DOM
   document.title = `${post.title} | LinkHub`;
-  document.getElementById('post-title')!.textContent = post.title;
-  document.getElementById('post-description')!.textContent = post.description;
-  document.getElementById('post-category')!.textContent = post.category;
-  document.getElementById('post-intro')!.textContent = post.intro;
-  document.getElementById('post-content')!.textContent = post.content;
-  document.getElementById('group-count')!.textContent = `${post.groups.length} Groups`;
+  
+  const elements = {
+    'post-title': post.title,
+    'post-description': post.description,
+    'post-category': post.category,
+    'post-intro': post.intro,
+    'post-content': post.content,
+    'group-count': `${post.groups.length} Groups`
+  };
+
+  Object.entries(elements).forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  });
   
   const img = document.getElementById('post-image') as HTMLImageElement;
-  img.src = post.image;
-  img.alt = post.title;
+  if (img) {
+    img.src = post.image;
+    img.alt = post.title;
+  }
 
   const groupsList = document.getElementById('groups-list');
   if (groupsList) {
@@ -150,4 +165,5 @@ async function init() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// Initialize
+init();

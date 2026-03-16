@@ -20,19 +20,23 @@
       gtag('config', 'G-H0H97SH5HQ');
     </script>
   </head>
-  <body class="bg-[#F8FAFC] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg">
+  <body class="bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg transition-colors duration-300">
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-slate-200/50">
+    <nav class="sticky top-0 z-50 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
           <a href="/" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200 group-hover:bg-emerald-600 transition-colors">
+            <div class="w-10 h-10 bg-slate-900 dark:bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200 dark:shadow-none group-hover:bg-emerald-600 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
             </div>
-            <span class="text-2xl font-extrabold tracking-tight text-slate-900 font-display">LinkHub</span>
+            <span class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white font-display">LinkHub</span>
           </a>
           <div class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-500">
-            <button id="share-btn" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-200 hover:border-slate-900 hover:text-slate-900 transition-all">
+            <button id="theme-toggle" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+              <svg id="sun-icon" class="hidden dark:block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <svg id="moon-icon" class="block dark:hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <button id="share-btn" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-900 dark:hover:border-white hover:text-slate-900 dark:hover:text-white transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
               Share Directory
             </button>
@@ -44,21 +48,21 @@
     <!-- Post Header -->
     <header id="post-header" class="pt-20 pb-24 lg:pt-32 lg:pb-40">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div id="post-category" class="inline-block px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-[0.2em] mb-8">Loading...</div>
-        <h1 id="post-title" class="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 font-display leading-tight">Loading Post...</h1>
-        <p id="post-description" class="text-xl lg:text-2xl text-slate-500 leading-relaxed mb-16 max-w-3xl mx-auto">Please wait while we fetch the details.</p>
+        <div id="post-category" class="inline-block px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-8">Loading...</div>
+        <h1 id="post-title" class="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-8 font-display leading-tight">Loading Post...</h1>
+        <p id="post-description" class="text-xl lg:text-2xl text-slate-500 dark:text-slate-400 leading-relaxed mb-16 max-w-3xl mx-auto">Please wait while we fetch the details.</p>
         
         <div class="relative group">
           <div class="absolute -inset-4 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-[3rem] blur-2xl opacity-50"></div>
-          <div class="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 mb-20 border-8 border-white">
+          <div class="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 dark:shadow-none mb-20 border-8 border-white dark:border-slate-900">
             <img id="post-image" src="https://picsum.photos/seed/loading/1200/630" alt="Featured Image" class="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </div>
         </div>
 
         <div class="max-w-2xl mx-auto text-left">
-          <div class="prose prose-slate prose-lg lg:prose-xl max-w-none">
-            <p id="post-intro" class="text-2xl font-bold text-slate-900 mb-8 leading-snug"></p>
-            <div id="post-content" class="text-slate-500 leading-relaxed space-y-6"></div>
+          <div class="prose prose-slate dark:prose-invert prose-lg lg:prose-xl max-w-none">
+            <p id="post-intro" class="text-2xl font-bold text-slate-900 dark:text-white mb-8 leading-snug"></p>
+            <div id="post-content" class="text-slate-500 dark:text-slate-400 leading-relaxed space-y-6"></div>
           </div>
         </div>
       </div>
@@ -85,9 +89,9 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 pt-16 pb-8">
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+        <div class="border-t border-slate-100 dark:border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
           <p>&copy; 2026 LinkHub Directory. All rights reserved.</p>
           <div class="flex gap-6">
             <a href="/" class="hover:text-emerald-600 transition-colors">Home</a>

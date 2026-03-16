@@ -20,22 +20,26 @@
       gtag('config', 'G-H0H97SH5HQ');
     </script>
   </head>
-  <body class="bg-[#F8FAFC] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg">
+  <body class="bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg transition-colors duration-300">
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-slate-200/50">
+    <nav class="sticky top-0 z-50 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200">
+            <div class="w-10 h-10 bg-slate-900 dark:bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200 dark:shadow-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             </div>
-            <span class="text-2xl font-extrabold tracking-tight text-slate-900 font-display">LinkHub</span>
+            <span class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white font-display">LinkHub</span>
           </div>
           <div class="hidden md:flex items-center gap-10 text-sm font-semibold text-slate-500">
-            <a href="/" class="text-slate-900">Discover</a>
-            <a href="#" class="hover:text-slate-900 transition-colors">Categories</a>
-            <a href="#" class="hover:text-slate-900 transition-colors">Trending</a>
-            <a href="#" class="bg-slate-900 text-white px-6 py-3 rounded-xl hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200">Submit Group</a>
+            <a href="/" class="text-slate-900 dark:text-white">Discover</a>
+            <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors">Categories</a>
+            <a href="#" class="hover:text-slate-900 dark:hover:text-white transition-colors">Trending</a>
+            <button id="theme-toggle" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+              <svg id="sun-icon" class="hidden dark:block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <svg id="moon-icon" class="block dark:hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <a href="#" class="bg-slate-900 dark:bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all shadow-xl shadow-slate-200 dark:shadow-none">Submit Group</a>
           </div>
           <button class="md:hidden p-2 text-slate-600">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
@@ -54,17 +58,17 @@
           </span>
           Live Directory
         </div>
-        <h1 class="text-6xl lg:text-8xl font-extrabold tracking-tight text-slate-900 mb-8 font-display leading-[1.1]">
+        <h1 class="text-6xl lg:text-8xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-8 font-display leading-[1.1]">
           Find Your <span class="text-transparent bg-clip-text bg-gradient-to-br from-emerald-500 to-teal-600">Circle</span>
         </h1>
-        <p class="max-w-2xl mx-auto text-xl text-slate-500 mb-12 leading-relaxed">
+        <p class="max-w-2xl mx-auto text-xl text-slate-500 dark:text-slate-400 mb-12 leading-relaxed">
           The premium curated directory for high-quality WhatsApp communities. Connect with people who share your passions.
         </p>
         
         <!-- Search Bar -->
         <div class="max-w-2xl mx-auto relative">
           <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-[2.5rem] blur opacity-20 group-focus-within:opacity-40 transition duration-1000"></div>
-          <div class="relative flex items-center bg-white rounded-[2rem] shadow-2xl shadow-slate-200/60 p-2 border border-slate-100">
+          <div class="relative flex items-center bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl shadow-slate-200/60 dark:shadow-none p-2 border border-slate-100 dark:border-slate-800">
             <div class="pl-6 text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
@@ -72,9 +76,9 @@
               type="text" 
               id="search-input"
               placeholder="Search by interest, city, or category..." 
-              class="w-full px-4 py-4 bg-transparent focus:outline-none text-lg text-slate-900 placeholder:text-slate-400 font-medium"
+              class="w-full px-4 py-4 bg-transparent focus:outline-none text-lg text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
             />
-            <button class="hidden sm:block bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] font-bold hover:bg-emerald-600 transition-all">
+            <button class="hidden sm:block bg-slate-900 dark:bg-emerald-600 text-white px-8 py-4 rounded-[1.5rem] font-bold hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all">
               Search
             </button>
           </div>
@@ -86,25 +90,25 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
       <!-- Categories -->
       <div class="flex flex-wrap items-center justify-center gap-4 mb-20 overflow-x-auto pb-4 no-scrollbar">
-        <button class="category-btn active px-8 py-3 rounded-2xl bg-slate-900 text-white text-sm font-bold shadow-2xl shadow-slate-200 transition-all whitespace-nowrap" data-category="All">All Communities</button>
-        <button class="category-btn px-8 py-3 rounded-2xl bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:border-slate-900 hover:text-slate-900 transition-all whitespace-nowrap" data-category="Dating">Dating</button>
-        <button class="category-btn px-8 py-3 rounded-2xl bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:border-slate-900 hover:text-slate-900 transition-all whitespace-nowrap" data-category="Friendship">Friendship</button>
-        <button class="category-btn px-8 py-3 rounded-2xl bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:border-slate-900 hover:text-slate-900 transition-all whitespace-nowrap" data-category="Local Groups">Local</button>
-        <button class="category-btn px-8 py-3 rounded-2xl bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:border-slate-900 hover:text-slate-900 transition-all whitespace-nowrap" data-category="Adult Groups">Adult</button>
-        <button class="category-btn px-8 py-3 rounded-2xl bg-white border border-slate-200 text-slate-500 text-sm font-bold hover:border-slate-900 hover:text-slate-900 transition-all whitespace-nowrap" data-category="Country Groups">Countries</button>
+        <button class="category-btn active px-8 py-3 rounded-2xl bg-slate-900 dark:bg-emerald-600 text-white text-sm font-bold shadow-2xl shadow-slate-200 dark:shadow-none transition-all whitespace-nowrap" data-category="All">All Communities</button>
+        <button class="category-btn px-8 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm font-bold hover:border-slate-900 dark:hover:border-white hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap" data-category="Dating">Dating</button>
+        <button class="category-btn px-8 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm font-bold hover:border-slate-900 dark:hover:border-white hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap" data-category="Friendship">Friendship</button>
+        <button class="category-btn px-8 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm font-bold hover:border-slate-900 dark:hover:border-white hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap" data-category="Local Groups">Local</button>
+        <button class="category-btn px-8 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm font-bold hover:border-slate-900 dark:hover:border-white hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap" data-category="Adult Groups">Adult</button>
+        <button class="category-btn px-8 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-sm font-bold hover:border-slate-900 dark:hover:border-white hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap" data-category="Country Groups">Countries</button>
       </div>
 
       <!-- Posts Grid -->
       <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         <!-- Loading Skeleton -->
-        <div class="animate-pulse bg-white rounded-[2.5rem] border border-slate-100 p-6 h-[450px]"></div>
-        <div class="animate-pulse bg-white rounded-[2.5rem] border border-slate-100 p-6 h-[450px]"></div>
-        <div class="animate-pulse bg-white rounded-[2.5rem] border border-slate-100 p-6 h-[450px]"></div>
+        <div class="animate-pulse bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-6 h-[450px]"></div>
+        <div class="animate-pulse bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-6 h-[450px]"></div>
+        <div class="animate-pulse bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-6 h-[450px]"></div>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 pt-16 pb-8">
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div class="col-span-1 md:col-span-2">
@@ -112,15 +116,15 @@
               <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link-2"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
               </div>
-              <span class="text-xl font-bold tracking-tight text-slate-900">LinkHub</span>
+              <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">LinkHub</span>
             </div>
-            <p class="text-slate-500 max-w-sm">
+            <p class="text-slate-500 dark:text-slate-400 max-w-sm">
               The world's most trusted directory for niche WhatsApp communities. Join thousands of users discovering new connections every day.
             </p>
           </div>
           <div>
-            <h4 class="font-bold text-slate-900 mb-6">Quick Links</h4>
-            <ul class="space-y-4 text-sm text-slate-600">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-6">Quick Links</h4>
+            <ul class="space-y-4 text-sm text-slate-600 dark:text-slate-400">
               <li><a href="/" class="hover:text-emerald-600 transition-colors">Home</a></li>
               <li><a href="#" class="hover:text-emerald-600 transition-colors">Submit a Group</a></li>
               <li><a href="#" class="hover:text-emerald-600 transition-colors">Privacy Policy</a></li>
@@ -128,15 +132,15 @@
             </ul>
           </div>
           <div>
-            <h4 class="font-bold text-slate-900 mb-6">Connect</h4>
-            <ul class="space-y-4 text-sm text-slate-600">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-6">Connect</h4>
+            <ul class="space-y-4 text-sm text-slate-600 dark:text-slate-400">
               <li><a href="#" class="hover:text-emerald-600 transition-colors">Twitter</a></li>
               <li><a href="#" class="hover:text-emerald-600 transition-colors">Instagram</a></li>
               <li><a href="#" class="hover:text-emerald-600 transition-colors">Support</a></li>
             </ul>
           </div>
         </div>
-        <div class="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+        <div class="border-t border-slate-100 dark:border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
           <p>&copy; 2026 LinkHub Directory. All rights reserved.</p>
           <p>Made with &hearts; for the community.</p>
         </div>

@@ -1,0 +1,17 @@
+{
+  "id": "getting-started",
+  "title": "Welcome to LinkHub",
+  "description": "Your directory is ready. Start adding your WhatsApp group links today!",
+  "image": "https://picsum.photos/seed/linkhub-welcome/800/600",
+  "category": "General",
+  "intro": "Welcome to your new LinkHub directory!",
+  "content": "This is a placeholder post. You can delete it once you've added your own communities. LinkHub helps you organize and share WhatsApp group links with ease.",
+  "groups": [
+    {
+      "name": "LinkHub Support",
+      "description": "Get help with your directory.",
+      "members": "Community",
+      "link": "https://vip-redirect.vercel.app"
+    }
+  ]
+}
