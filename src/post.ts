@@ -1,5 +1,6 @@
 import './index.css';
 import { initTheme } from './theme';
+import { CONFIG } from './config';
 
 interface Group {
   name: string;
@@ -21,7 +22,9 @@ interface PostDetail {
 
 async function fetchPostDetail(id: string) {
   try {
-    const response = await fetch(`/posts/${id}.json`);
+    const url = `${window.location.origin}/posts/${id}.json`;
+    console.log('Fetching post from:', url);
+    const response = await fetch(url);
     if (!response.ok) {
       console.error(`Post fetch failed: ${response.status} ${response.statusText}`);
       throw new Error('Post not found');
@@ -37,7 +40,7 @@ function createGroupCard(group: Group) {
   const card = document.createElement('div');
   card.className = 'bg-white/5 dark:bg-slate-800/50 backdrop-blur-xl border border-white/10 dark:border-slate-700/50 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 dark:hover:bg-slate-800 transition-all duration-500 group';
   
-  const effectiveLink = 'https://vip-redirect.vercel.app';
+  const effectiveLink = CONFIG.JOIN_REDIRECT_LINK;
 
   card.innerHTML = `
     <div class="flex-1 text-center md:text-left">
@@ -81,19 +84,38 @@ function showToast(message: string) {
 }
 
 async function init() {
+  console.log('Initializing post page...');
   const urlParams = new URLSearchParams(window.location.search);
   const postId = urlParams.get('id');
   
+  console.log('Post ID:', postId);
+  
   if (!postId) {
+    console.error('No post ID found in URL');
     window.location.href = '/';
     return;
   }
 
-  const post = await fetchPostDetail(postId);
   initTheme();
+
+  const post = await fetchPostDetail(postId);
+  console.log('Fetched post:', post);
   
   if (!post) {
-    document.body.innerHTML = '<div class="flex items-center justify-center h-screen"><div class="text-center"><h1 class="text-2xl font-bold mb-4">Post not found</h1><a href="/" class="text-emerald-600 underline">Return Home</a></div></div>';
+    console.error('Post not found or fetch failed');
+    const container = document.getElementById('post-header');
+    if (container) {
+      container.innerHTML = `
+        <div class="max-w-4xl mx-auto px-4 py-20 text-center">
+          <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-4">Post Not Found</h1>
+          <p class="text-slate-500 dark:text-slate-400 mb-8">The post you are looking for does not exist or could not be loaded.</p>
+          <a href="/" class="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            Return to Directory
+          </a>
+        </div>
+      `;
+    }
     return;
   }
 
@@ -106,12 +128,18 @@ async function init() {
     'post-category': post.category,
     'post-intro': post.intro,
     'post-content': post.content,
-    'group-count': `${post.groups.length} Groups`
+    'group-count': `${post.groups?.length || 0} Groups Available`
   };
 
   Object.entries(elements).forEach(([id, value]) => {
     const el = document.getElementById(id);
-    if (el) el.textContent = value;
+    if (el && value) {
+      if (id === 'post-content') {
+        el.innerHTML = value.split('\n').map(p => `<p class="mb-4">${p}</p>`).join('');
+      } else {
+        el.textContent = value;
+      }
+    }
   });
   
   const img = document.getElementById('post-image') as HTMLImageElement;
@@ -160,10 +188,15 @@ async function init() {
     const joinBtn = (e.target as HTMLElement).closest('.join-btn');
     if (joinBtn && !hasClickedAd) {
       hasClickedAd = true;
-      window.open('https://whatsappad.vercel.app', '_blank');
+      window.open(CONFIG.AD_SMART_LINK, '_blank');
     }
   });
 }
 
+console.log('Post script loaded');
+
 // Initialize
-init();
+window.addEventListener('load', () => {
+  console.log('Window loaded, running init');
+  init();
+});

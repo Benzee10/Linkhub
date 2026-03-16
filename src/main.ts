@@ -11,7 +11,8 @@ interface Post {
 
 async function fetchPosts() {
   try {
-    const response = await fetch('/posts/index.json');
+    const url = `${window.location.origin}/posts/index.json`;
+    const response = await fetch(url);
     return await response.json() as Post[];
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -127,4 +128,4 @@ async function init() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('load', init);
