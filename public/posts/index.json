@@ -5,7 +5,8 @@
     "description": "Join high-quality Nigerian girls' WhatsApp groups for adults to meet, chat, and share content.",
     "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
     "category": "Country Groups",
-    "keywords": ["Nigeria", "Lagos", "Abuja", "Port Harcourt", "Kano", "Ibadan"]
+    "keywords": ["Nigeria", "Lagos", "Abuja", "Port Harcourt", "Kano", "Ibadan"],
+    "trending": true
   },
   {
     "id": "kenyan-girls",
@@ -13,7 +14,8 @@
     "description": "Join high-quality Kenyan girls' WhatsApp groups for adults to meet, chat, and share content.",
     "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
     "category": "Country Groups",
-    "keywords": ["Kenya", "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"]
+    "keywords": ["Kenya", "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"],
+    "trending": true
   },
   {
     "id": "ghana-girls",
@@ -21,7 +23,8 @@
     "description": "Connect with beautiful Ghana girls in exclusive WhatsApp groups for dating and fun.",
     "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10",
     "category": "Country Groups",
-    "keywords": ["Ghana", "Accra", "Kumasi", "Tamale", "Takoradi", "Cape Coast"]
+    "keywords": ["Ghana", "Accra", "Kumasi", "Tamale", "Takoradi", "Cape Coast"],
+    "trending": true
   },
   {
     "id": "south-africa-girls",

@@ -8,6 +8,7 @@ interface Post {
   image: string;
   category: string;
   keywords?: string[];
+  trending?: boolean;
 }
 
 async function fetchPosts() {
@@ -21,9 +22,9 @@ async function fetchPosts() {
   }
 }
 
-function createPostCard(post: Post) {
+function createPostCard(post: Post, isTrending = false) {
   const card = document.createElement('div');
-  card.className = 'premium-card group';
+  card.className = isTrending ? 'premium-card group min-w-[320px] md:min-w-[380px]' : 'premium-card group';
   
   card.innerHTML = `
     <div class="aspect-[16/10] overflow-hidden relative rounded-[1.5rem] mb-6">
@@ -34,10 +35,16 @@ function createPostCard(post: Post) {
         loading="lazy"
         referrerPolicy="no-referrer"
       />
-      <div class="absolute top-4 left-4">
+      <div class="absolute top-4 left-4 flex gap-2">
         <span class="px-4 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white text-[10px] font-bold uppercase tracking-widest shadow-xl">
           ${post.category}
         </span>
+        ${isTrending ? `
+          <span class="px-4 py-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-xl flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4-4-4"/><path d="M3 3.412C3 2.632 3.632 2 4.412 2H20c.78 0 1.412.632 1.412 1.412v17.176c0 .78-.632 1.412-1.412 1.412H4.412C3.632 22 3 21.368 3 20.588V3.412Z"/><path d="M8 11h8"/><path d="M8 15h8"/><path d="M8 7h1"/></svg>
+            Trending
+          </span>
+        ` : ''}
       </div>
     </div>
     <div class="px-2">
@@ -64,12 +71,22 @@ function createPostCard(post: Post) {
 
 async function init() {
   const postsGrid = document.getElementById('posts-grid');
+  const trendingGrid = document.getElementById('trending-grid');
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const categoryBtns = document.querySelectorAll('.category-btn');
   
   let allPosts: Post[] = [];
   let currentCategory = 'All';
   let searchQuery = '';
+
+  const renderTrending = () => {
+    if (!trendingGrid) return;
+    const trendingPosts = allPosts.filter(p => p.trending);
+    trendingGrid.innerHTML = '';
+    trendingPosts.forEach(post => {
+      trendingGrid.appendChild(createPostCard(post, true));
+    });
+  };
 
   const renderPosts = () => {
     if (!postsGrid) return;
@@ -108,7 +125,20 @@ async function init() {
   // Fetch and initial render
   initTheme();
   allPosts = await fetchPosts();
+  renderTrending();
   renderPosts();
+
+  // Trending Navigation
+  const trendingPrev = document.getElementById('trending-prev');
+  const trendingNext = document.getElementById('trending-next');
+  if (trendingPrev && trendingNext && trendingGrid) {
+    trendingNext.addEventListener('click', () => {
+      trendingGrid.scrollBy({ left: 400, behavior: 'smooth' });
+    });
+    trendingPrev.addEventListener('click', () => {
+      trendingGrid.scrollBy({ left: -400, behavior: 'smooth' });
+    });
+  }
 
   // Search event
   searchInput?.addEventListener('input', (e) => {
