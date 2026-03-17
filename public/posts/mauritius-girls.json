@@ -18,6 +18,54 @@
       "description": "Vibrant adult conversations across Mauritius.",
       "members": "3K+",
       "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Grand Baie Night Life",
+      "description": "Connecting people for night life in Grand Baie.",
+      "members": "1K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Curepipe Singles Network",
+      "description": "The largest network for singles in Curepipe.",
+      "members": "1.5K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Flic en Flac Secret Chat",
+      "description": "Secure and private chat for Flic en Flac members.",
+      "members": "1K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Mauritius VIP Lounge",
+      "description": "Premium access for selected Mauritius members.",
+      "members": "1K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Port Louis Private Circle",
+      "description": "Private circle for trusted members in Port Louis.",
+      "members": "2K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Mauritius Adult Circle",
+      "description": "A mature circle for adult discussions in Mauritius.",
+      "members": "4K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Mauritius Hookup Hub",
+      "description": "Fast and easy hookups across Mauritius.",
+      "members": "2.5K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Tamarin Dating Circle",
+      "description": "Meet singles in Tamarin for fun and dating.",
+      "members": "1.5K+",
+      "link": "https://vip-redirect.vercel.app"
     }
   ]
 }

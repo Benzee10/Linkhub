@@ -24,6 +24,48 @@
       "description": "Vibrant adult conversations across Southern Africa.",
       "members": "25K+",
       "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Joburg Night Life",
+      "description": "Connecting people for night life in Johannesburg.",
+      "members": "10K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Cape Town Singles Network",
+      "description": "The largest network for singles in Cape Town.",
+      "members": "15K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Gaborone Secret Chat",
+      "description": "Secure and private chat for Gaborone members.",
+      "members": "5K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Southern Africa VIP Lounge",
+      "description": "Premium access for selected Southern Africa members.",
+      "members": "4K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Windhoek Private Circle",
+      "description": "Private circle for trusted members in Windhoek.",
+      "members": "6K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Southern Africa Adult Circle",
+      "description": "A mature circle for adult discussions in Southern Africa.",
+      "members": "30K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Southern Africa Hookup Hub",
+      "description": "Fast and easy hookups across Southern Africa.",
+      "members": "20K+",
+      "link": "https://vip-redirect.vercel.app"
     }
   ]
 }

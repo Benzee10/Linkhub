@@ -24,6 +24,48 @@
       "description": "Vibrant adult conversations across South Africa.",
       "members": "15K+",
       "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Durban Night Life",
+      "description": "Connecting people for night life in Durban.",
+      "members": "7K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Pretoria Singles Network",
+      "description": "The largest network for singles in Pretoria.",
+      "members": "12K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Soweto Secret Chat",
+      "description": "Secure and private chat for Soweto members.",
+      "members": "5K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "SA VIP Lounge",
+      "description": "Premium access for selected SA members.",
+      "members": "6K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "Joburg Private Circle",
+      "description": "Private circle for trusted members in Joburg.",
+      "members": "9K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "SA Adult Circle",
+      "description": "A mature circle for adult discussions in SA.",
+      "members": "20K+",
+      "link": "https://vip-redirect.vercel.app"
+    },
+    {
+      "name": "SA Hookup Hub",
+      "description": "Fast and easy hookups across South Africa.",
+      "members": "11K+",
+      "link": "https://vip-redirect.vercel.app"
     }
   ]
 }
