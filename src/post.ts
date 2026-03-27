@@ -82,10 +82,16 @@ function createGroupCard(group: Group) {
   card.innerHTML = `
     <div class="flex-1 text-center md:text-left">
       <div class="flex flex-col md:flex-row items-center gap-4 mb-3">
-        <h3 class="text-2xl font-bold text-white font-display">${group.name}</h3>
-        ${group.members ? `<span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">${group.members} Members</span>` : ''}
+        <h3 class="text-2xl font-bold text-white font-display group-hover:text-emerald-400 transition-colors">${group.name}</h3>
+        <div class="flex items-center gap-2">
+          ${group.members ? `<span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">${group.members} Members</span>` : ''}
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Verified
+          </span>
+        </div>
       </div>
-      <p class="text-slate-400 dark:text-slate-300 text-base leading-relaxed max-w-xl">${group.description}</p>
+      <p class="text-slate-400 dark:text-slate-300 text-base leading-relaxed max-w-xl group-hover:text-white transition-colors">${group.description}</p>
     </div>
     <div class="flex items-center gap-4 w-full md:w-auto">
       <button class="copy-btn p-4 rounded-2xl bg-white/5 dark:bg-slate-700/50 text-slate-400 hover:text-white hover:bg-white/10 dark:hover:bg-slate-700 transition-all border border-white/5 dark:border-slate-700" data-link="${effectiveLink}" title="Copy Link">

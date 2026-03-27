@@ -35,7 +35,29 @@ function createPostCard(post: Post, isTrending = false) {
         loading="lazy"
         referrerPolicy="no-referrer"
       />
-      <div class="absolute top-4 left-4 flex gap-2">
+      
+      <!-- Quick Preview Overlay -->
+      <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-center p-8 text-white z-10">
+        <div class="mb-6">
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400 mb-2 block">Community Preview</span>
+          <p class="text-sm leading-relaxed text-slate-200 line-clamp-4 font-medium">${post.description}</p>
+        </div>
+        <div class="space-y-3">
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400 mb-2 block">Highlights</span>
+          <div class="flex flex-wrap gap-2">
+            ${post.keywords ? post.keywords.slice(0, 4).map(k => `
+              <span class="px-3 py-1 rounded-lg bg-white/10 border border-white/10 text-[10px] font-bold">
+                ${k}
+              </span>
+            `).join('') : `
+              <span class="px-3 py-1 rounded-lg bg-white/10 border border-white/10 text-[10px] font-bold">Verified Links</span>
+              <span class="px-3 py-1 rounded-lg bg-white/10 border border-white/10 text-[10px] font-bold">Active Chat</span>
+            `}
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute top-4 left-4 flex gap-2 z-20">
         <span class="px-4 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white text-[10px] font-bold uppercase tracking-widest shadow-xl">
           ${post.category}
         </span>
@@ -51,9 +73,19 @@ function createPostCard(post: Post, isTrending = false) {
       <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3 font-display group-hover:text-emerald-600 transition-colors leading-tight">
         ${post.title}
       </h3>
-      <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed mb-8 line-clamp-2 font-medium">
+      <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed mb-6 line-clamp-2 font-medium">
         ${post.description}
       </p>
+      
+      <!-- Quick Tags -->
+      <div class="flex flex-wrap gap-2 mb-8">
+        ${post.keywords ? post.keywords.slice(0, 3).map(k => `
+          <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider border border-slate-200/50 dark:border-slate-700/50">
+            #${k}
+          </span>
+        `).join('') : ''}
+      </div>
+
       <a 
         href="/post.html?id=${post.id}" 
         class="inline-flex items-center justify-between w-full py-4 px-6 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold hover:bg-slate-900 dark:hover:bg-emerald-600 hover:text-white transition-all duration-300 group/btn"
