@@ -1,5 +1,8 @@
 import './index.css';
 import { initTheme } from './theme';
+import { inject } from '@vercel/analytics';
+
+inject();
 
 interface Post {
   id: string;

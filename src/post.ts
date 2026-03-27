@@ -1,6 +1,9 @@
 import './index.css';
 import { initTheme } from './theme';
 import { CONFIG } from './config';
+import { inject } from '@vercel/analytics';
+
+inject();
 
 interface Group {
   name: string;
