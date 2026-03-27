@@ -36,6 +36,43 @@ async function fetchPostDetail(id: string) {
   }
 }
 
+function updateMetaTags(post: PostDetail) {
+  // Update Title
+  document.title = `${post.title} | LinkHub`;
+
+  // Update Description
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) {
+    metaDescription.setAttribute('content', post.description);
+  }
+
+  // Update Open Graph
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', post.title);
+
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  if (ogDescription) ogDescription.setAttribute('content', post.description);
+
+  const ogImage = document.querySelector('meta[property="og:image"]');
+  if (ogImage) ogImage.setAttribute('content', post.image);
+
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+
+  // Update Twitter
+  const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+  if (twitterTitle) twitterTitle.setAttribute('content', post.title);
+
+  const twitterDescription = document.querySelector('meta[property="twitter:description"]');
+  if (twitterDescription) twitterDescription.setAttribute('content', post.description);
+
+  const twitterImage = document.querySelector('meta[property="twitter:image"]');
+  if (twitterImage) twitterImage.setAttribute('content', post.image);
+
+  const twitterUrl = document.querySelector('meta[property="twitter:url"]');
+  if (twitterUrl) twitterUrl.setAttribute('content', window.location.href);
+}
+
 function createGroupCard(group: Group) {
   const card = document.createElement('div');
   card.className = 'bg-white/5 dark:bg-slate-800/50 backdrop-blur-xl border border-white/10 dark:border-slate-700/50 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 dark:hover:bg-slate-800 transition-all duration-500 group';
@@ -119,9 +156,10 @@ async function init() {
     return;
   }
 
+  // Update Meta Tags
+  updateMetaTags(post);
+
   // Update DOM
-  document.title = `${post.title} | LinkHub`;
-  
   const elements = {
     'post-title': post.title,
     'post-description': post.description,
