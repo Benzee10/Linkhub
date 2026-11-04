@@ -20,6 +20,8 @@ export default defineConfig(({mode}) => {
         input: {
           main: path.resolve(__dirname, 'index.html'),
           post: path.resolve(__dirname, 'post.html'),
+          blog: path.resolve(__dirname, 'blog.html'),
+          blogPost: path.resolve(__dirname, 'blog-post.html'),
         },
       },
     },

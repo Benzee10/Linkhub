@@ -96,6 +96,65 @@ async function startServer() {
     res.status(200).set({ "Content-Type": "text/html" }).end(template);
   });
 
+  // Handle blog.html
+  app.get(["/blog", "/blog.html"], async (req, res, next) => {
+    try {
+      const isProd = process.env.NODE_ENV === "production";
+      let templatePath = path.resolve(process.cwd(), isProd ? "dist/blog.html" : "blog.html");
+      if (!fs.existsSync(templatePath)) {
+        templatePath = path.resolve(process.cwd(), "blog.html");
+      }
+      let template = fs.readFileSync(templatePath, "utf-8");
+      if (vite) {
+        template = await vite.transformIndexHtml(req.originalUrl, template);
+      }
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    } catch (e) {
+      if (vite) vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+
+  // Handle blog-post.html with dynamic meta tags
+  app.get(["/blog-post", "/blog-post.html"], async (req, res, next) => {
+    try {
+      const postId = (req.query.id as string) || "how-to-find-and-join-active-whatsapp-groups-safely";
+      const isProd = process.env.NODE_ENV === "production";
+      let templatePath = path.resolve(process.cwd(), isProd ? "dist/blog-post.html" : "blog-post.html");
+      if (!fs.existsSync(templatePath)) {
+        templatePath = path.resolve(process.cwd(), "blog-post.html");
+      }
+      let template = fs.readFileSync(templatePath, "utf-8");
+
+      try {
+        const blogPath = path.resolve(process.cwd(), "public", "blogs", `${postId}.json`);
+        if (fs.existsSync(blogPath)) {
+          const blog = JSON.parse(fs.readFileSync(blogPath, "utf-8"));
+          template = template.replace(/<title>.*?<\/title>/, `<title>${blog.title} | LinkHub Blog</title>`);
+          template = template.replace(/<meta property="og:title" content=".*?" \/>/, `<meta property="og:title" content="${blog.title}" />`);
+          template = template.replace(/<meta property="og:description" content=".*?" \/>/, `<meta property="og:description" content="${blog.description || blog.excerpt}" />`);
+          template = template.replace(/<meta property="og:image" content=".*?" \/>/, `<meta property="og:image" content="${blog.coverImage}" />`);
+          template = template.replace(/<meta property="og:url" content=".*?" \/>/, `<meta property="og:url" content="${req.protocol}://${req.get('host')}${req.originalUrl}" />`);
+          template = template.replace(/<meta property="twitter:title" content=".*?" \/>/, `<meta property="twitter:title" content="${blog.title}" />`);
+          template = template.replace(/<meta property="twitter:url" content=".*?" \/>/, `<meta property="twitter:url" content="${req.protocol}://${req.get('host')}${req.originalUrl}" />`);
+          template = template.replace(/<meta property="twitter:description" content=".*?" \/>/, `<meta property="twitter:description" content="${blog.description || blog.excerpt}" />`);
+          template = template.replace(/<meta property="twitter:image" content=".*?" \/>/, `<meta property="twitter:image" content="${blog.coverImage}" />`);
+          template = template.replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${blog.description || blog.excerpt}" />`);
+        }
+      } catch (err) {
+        console.error("Error injecting blog meta tags:", err);
+      }
+
+      if (vite) {
+        template = await vite.transformIndexHtml(req.originalUrl, template);
+      }
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    } catch (e) {
+      if (vite) vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+
   // Fallback for other routes
   app.get("*", async (req, res, next) => {
     const url = req.originalUrl;
