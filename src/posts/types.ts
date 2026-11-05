@@ -39,6 +39,9 @@ export interface BlogPost {
   excerpt: string;
   coverImage: string;
   socialPreviewImage?: string;
+  socialPreviewImageWidth?: number;
+  socialPreviewImageHeight?: number;
+  url?: string;
   category: string;
   author: string;
   authorRole?: string;
