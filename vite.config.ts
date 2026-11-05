@@ -5,9 +5,8 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
-  // Vercel exposes the production host to builds, including preview builds.
-  const productionHost = env.VERCEL_PROJECT_PRODUCTION_URL || 'linkhub-benzee1000gmailcoms-projects.vercel.app';
-  const productionOrigin = `https://${productionHost}`;
+  // Keep canonical and social links on the public production site, even for previews.
+  const productionOrigin = (env.LINKHUB_PUBLIC_ORIGIN || 'https://linkhubi.pages.dev').replace(/\/+$/, '');
   return {
     plugins: [
       react(),
