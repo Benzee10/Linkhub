@@ -1,5 +1,6 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
 
 inject();
@@ -83,6 +84,7 @@ function createBlogCard(post: BlogPostPreview): HTMLElement {
 
 async function initBlog() {
   initTheme();
+  initMobileMenu();
   const blogGrid = document.getElementById('blog-grid');
   if (!blogGrid) return;
 

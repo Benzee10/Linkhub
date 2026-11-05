@@ -1,5 +1,6 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
 
 inject();
@@ -159,6 +160,7 @@ async function init() {
 
   // Fetch and initial render
   initTheme();
+  initMobileMenu();
   allPosts = await fetchPosts();
   renderTrending();
   renderPosts();

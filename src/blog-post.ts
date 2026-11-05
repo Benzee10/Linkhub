@@ -1,5 +1,6 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
 
 inject();
@@ -62,8 +63,15 @@ function updateMeta(post: BlogPostDetail) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.setAttribute('content', post.description || post.excerpt);
 
+  const absoluteImage = post.coverImage.startsWith('http')
+    ? post.coverImage
+    : `${window.location.origin}${post.coverImage.startsWith('/') ? post.coverImage : '/' + post.coverImage}`;
+
   const ogImg = document.querySelector('meta[property="og:image"]');
-  if (ogImg) ogImg.setAttribute('content', post.coverImage);
+  if (ogImg) ogImg.setAttribute('content', absoluteImage);
+
+  const ogImgSecure = document.querySelector('meta[property="og:image:secure_url"]');
+  if (ogImgSecure) ogImgSecure.setAttribute('content', absoluteImage);
 
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute('content', window.location.href);
@@ -75,7 +83,7 @@ function updateMeta(post: BlogPostDetail) {
   if (twDesc) twDesc.setAttribute('content', post.description || post.excerpt);
 
   const twImg = document.querySelector('meta[property="twitter:image"]');
-  if (twImg) twImg.setAttribute('content', post.coverImage);
+  if (twImg) twImg.setAttribute('content', absoluteImage);
 
   const twUrl = document.querySelector('meta[property="twitter:url"]');
   if (twUrl) twUrl.setAttribute('content', window.location.href);
@@ -83,6 +91,7 @@ function updateMeta(post: BlogPostDetail) {
 
 async function initBlogPost() {
   initTheme();
+  initMobileMenu();
 
   const urlParams = new URLSearchParams(window.location.search);
   const postId = urlParams.get('id') || 'how-to-find-and-join-active-whatsapp-groups-safely';

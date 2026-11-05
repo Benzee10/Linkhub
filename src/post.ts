@@ -1,5 +1,6 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initMobileMenu } from './navigation';
 import { CONFIG } from './config';
 import { inject } from '@vercel/analytics';
 
@@ -56,8 +57,15 @@ function updateMetaTags(post: PostDetail) {
   const ogDescription = document.querySelector('meta[property="og:description"]');
   if (ogDescription) ogDescription.setAttribute('content', post.description);
 
+  const absoluteImage = post.image.startsWith('http') 
+    ? post.image 
+    : `${window.location.origin}${post.image.startsWith('/') ? post.image : '/' + post.image}`;
+
   const ogImage = document.querySelector('meta[property="og:image"]');
-  if (ogImage) ogImage.setAttribute('content', post.image);
+  if (ogImage) ogImage.setAttribute('content', absoluteImage);
+
+  const ogImageSecure = document.querySelector('meta[property="og:image:secure_url"]');
+  if (ogImageSecure) ogImageSecure.setAttribute('content', absoluteImage);
 
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) ogUrl.setAttribute('content', window.location.href);
@@ -70,7 +78,7 @@ function updateMetaTags(post: PostDetail) {
   if (twitterDescription) twitterDescription.setAttribute('content', post.description);
 
   const twitterImage = document.querySelector('meta[property="twitter:image"]');
-  if (twitterImage) twitterImage.setAttribute('content', post.image);
+  if (twitterImage) twitterImage.setAttribute('content', absoluteImage);
 
   const twitterUrl = document.querySelector('meta[property="twitter:url"]');
   if (twitterUrl) twitterUrl.setAttribute('content', window.location.href);
@@ -143,6 +151,7 @@ async function init() {
   }
 
   initTheme();
+  initMobileMenu();
 
   const post = await fetchPostDetail(postId);
   console.log('Fetched post:', post);
