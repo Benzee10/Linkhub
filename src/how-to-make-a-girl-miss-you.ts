@@ -27,12 +27,13 @@ window.addEventListener('load', () => {
   initMobileMenu();
 
   document.getElementById('share-blog-btn')?.addEventListener('click', async () => {
+    const shareUrl = new URL('/how-to-make-a-girl-miss-you', window.location.origin).href;
     if (navigator.share) {
       try {
         await navigator.share({
           title: document.title,
           text: document.querySelector<HTMLMetaElement>('meta[name="description"]')?.content || document.title,
-          url: window.location.href,
+          url: shareUrl,
         });
         return;
       } catch (error) {
@@ -41,7 +42,7 @@ window.addEventListener('load', () => {
     }
 
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(shareUrl);
       showToast('Article link copied to clipboard!');
     } catch {
       showToast('Unable to copy the article link.');

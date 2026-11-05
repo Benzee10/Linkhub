@@ -108,8 +108,8 @@ async function startServer() {
     }
 
     // og:image:width & height (Crucial for WhatsApp/Facebook instant thumbnail rendering)
-    const imgWidth = meta.imageWidth || (meta.imageUrl.includes('20261105-154753') ? 1280 : 1200);
-    const imgHeight = meta.imageHeight || (meta.imageUrl.includes('20261105-154753') ? 720 : 630);
+    const imgWidth = meta.imageWidth || (meta.imageUrl.includes('how-to-make-a-girl-miss-you-preview.jpg') ? 1280 : 1200);
+    const imgHeight = meta.imageHeight || (meta.imageUrl.includes('how-to-make-a-girl-miss-you-preview.jpg') ? 720 : 630);
     if (/<meta\s+property=["']og:image:width["']/i.test(result)) {
       result = result.replace(/<meta\s+property=["']og:image:width["'][^>]*>/i, `<meta property="og:image:width" content="${imgWidth}" />`);
     } else {
@@ -180,12 +180,6 @@ async function startServer() {
     }
     if (!/<meta\s+itemprop=["']image["']/i.test(result)) {
       result = result.replace('</head>', `<meta itemprop="image" content="${meta.imageUrl}" />\n</head>`);
-    }
-
-    // Add local fallback og:image if sharing the postimg image
-    if (meta.imageUrl.includes('20261105-154753') && !result.includes('how-to-make-a-girl-miss-you-preview.jpg')) {
-      const localFallbackUrl = meta.pageUrl.replace(/\/[^/]*$/, '/blogs/how-to-make-a-girl-miss-you-preview.jpg');
-      result = result.replace('</head>', `<meta property="og:image" content="${localFallbackUrl}" />\n</head>`);
     }
 
     return result;
@@ -267,12 +261,14 @@ async function startServer() {
           const blog = JSON.parse(fs.readFileSync(blogPath, "utf-8"));
           const previewImage = blog.socialPreviewImage || blog.coverImage;
           const blogImageUrl = getAbsoluteUrl(req, previewImage);
-          const currentUrl = getPageUrl(req);
+          const currentUrl = blog.url ? getAbsoluteUrl(req, blog.url) : getPageUrl(req);
 
           template = injectSocialMetaTags(template, {
             title: `${blog.title} | LinkHub Blog`,
             description: blog.description || blog.excerpt,
             imageUrl: blogImageUrl,
+            imageWidth: blog.socialPreviewImageWidth,
+            imageHeight: blog.socialPreviewImageHeight,
             pageUrl: currentUrl,
             type: "article",
           });

@@ -42,6 +42,13 @@ async function fetchBlogPost(id: string): Promise<BlogPostDetail | null> {
   return null;
 }
 
+function getCanonicalPostUrl(post: BlogPostDetail): string {
+  if (post.url) {
+    return new URL(post.url, window.location.origin).href;
+  }
+  return window.location.href;
+}
+
 function updateMeta(post: BlogPostDetail) {
   document.title = `${post.title} | LinkHub Blog`;
 
@@ -58,6 +65,7 @@ function updateMeta(post: BlogPostDetail) {
   const absoluteImage = rawImage.startsWith('http')
     ? rawImage
     : `${window.location.origin}${rawImage.startsWith('/') ? rawImage : '/' + rawImage}`;
+  const canonicalUrl = getCanonicalPostUrl(post);
 
   const ogImg = document.querySelector('meta[property="og:image"]');
   if (ogImg) ogImg.setAttribute('content', absoluteImage);
@@ -66,19 +74,19 @@ function updateMeta(post: BlogPostDetail) {
   if (ogImgSecure) ogImgSecure.setAttribute('content', absoluteImage);
 
   const ogUrl = document.querySelector('meta[property="og:url"]');
-  if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+  if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
 
-  const twTitle = document.querySelector('meta[property="twitter:title"]');
+  const twTitle = document.querySelector('meta[property="twitter:title"], meta[name="twitter:title"]');
   if (twTitle) twTitle.setAttribute('content', post.title);
 
-  const twDesc = document.querySelector('meta[property="twitter:description"]');
+  const twDesc = document.querySelector('meta[property="twitter:description"], meta[name="twitter:description"]');
   if (twDesc) twDesc.setAttribute('content', post.description || post.excerpt);
 
-  const twImg = document.querySelector('meta[property="twitter:image"]');
+  const twImg = document.querySelector('meta[property="twitter:image"], meta[name="twitter:image"]');
   if (twImg) twImg.setAttribute('content', absoluteImage);
 
-  const twUrl = document.querySelector('meta[property="twitter:url"]');
-  if (twUrl) twUrl.setAttribute('content', window.location.href);
+  const twUrl = document.querySelector('meta[property="twitter:url"], meta[name="twitter:url"]');
+  if (twUrl) twUrl.setAttribute('content', canonicalUrl);
 }
 
 async function initBlogPost() {
@@ -181,19 +189,20 @@ async function initBlogPost() {
   }
 
   shareBtn?.addEventListener('click', async () => {
+    const shareUrl = getCanonicalPostUrl(post);
     if (navigator.share) {
       try {
         await navigator.share({
           title: post.title,
           text: post.excerpt,
-          url: window.location.href,
+          url: shareUrl,
         });
         return;
       } catch (err) {
         // User dismissed share dialog or unsupported
       }
     }
-    await navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(shareUrl);
     showToast('Article link copied to clipboard!');
   });
 

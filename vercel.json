@@ -3,6 +3,36 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/blog-post",
+      "has": [
+        {
+          "type": "query",
+          "key": "id",
+          "value": "how-to-make-a-girl-miss-you"
+        }
+      ],
+      "destination": "/how-to-make-a-girl-miss-you.html"
+    },
+    {
+      "source": "/blog-post.html",
+      "has": [
+        {
+          "type": "query",
+          "key": "id",
+          "value": "how-to-make-a-girl-miss-you"
+        }
+      ],
+      "destination": "/how-to-make-a-girl-miss-you.html"
+    },
+    {
+      "source": "/how-to-make-a-girl-miss-you",
+      "destination": "/how-to-make-a-girl-miss-you.html"
+    },
+    {
+      "source": "/signs-a-woman-has-just-slept-with-another-man",
+      "destination": "/signs-a-woman-has-just-slept-with-another-man.html"
+    },
+    {
       "source": "/post",
       "destination": "/post.html"
     },
