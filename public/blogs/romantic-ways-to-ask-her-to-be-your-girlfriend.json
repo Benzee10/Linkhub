@@ -21,7 +21,13 @@
     },
     {
       "heading": "1. Make a custom playlist",
-      "body": "Put together songs that remind you of her, tracks you both love, or music that tells the story of your time together. Listen side by side, or send it to her if you are apart. When the moment feels right, tell her why you chose the songs and ask your question."
+      "body": "Put together songs that remind you of her, tracks you both love, or music that tells the story of your time together. Listen side by side, or send it to her if you are apart. When the moment feels right, tell her why you chose the songs and ask your question.",
+      "whatsappCta": {
+        "title": "Looking for dating advice or romance discussions?",
+        "description": "Join thousands of singles and relationship enthusiasts exchanging ideas in curated WhatsApp rooms.",
+        "buttonText": "Join Dating WhatsApp Groups",
+        "targetCategory": "Dating"
+      }
     },
     {
       "heading": "2. Plan a lovely dinner",
@@ -37,7 +43,13 @@
     },
     {
       "heading": "5. Write a love letter",
-      "body": "If you express yourself best in writing, put your feelings on paper. Mention a memory you treasure, what makes her special to you, and why you would like to take the next step. Finish with a simple question: “Will you be my girlfriend?”"
+      "body": "If you express yourself best in writing, put your feelings on paper. Mention a memory you treasure, what makes her special to you, and why you would like to take the next step. Finish with a simple question: “Will you be my girlfriend?”",
+      "whatsappCta": {
+        "title": "Want to connect with members in your local area?",
+        "description": "Find local WhatsApp groups in your city for dining, coffee meetups, and real conversations.",
+        "buttonText": "Explore Local WhatsApp Groups",
+        "targetCategory": "Local Groups"
+      }
     },
     {
       "heading": "6. Give a thoughtful gift",
@@ -61,7 +73,13 @@
     },
     {
       "heading": "Let your feelings do the talking",
-      "body": "Whatever you choose, speak honestly and give her space to answer without pressure. You could say: “I really love spending time with you, and I would like us to be more than we are now. Would you like to be my girlfriend?” Listen to her answer and respect it, whether she says yes, needs time, or feels differently."
+      "body": "Whatever you choose, speak honestly and give her space to answer without pressure. You could say: “I really love spending time with you, and I would like us to be more than we are now. Would you like to be my girlfriend?” Listen to her answer and respect it, whether she says yes, needs time, or feels differently.",
+      "whatsappCta": {
+        "title": "Ready to discover more verified communities?",
+        "description": "Find and join high-quality WhatsApp group links across multiple categories instantly.",
+        "buttonText": "Discover All WhatsApp Groups",
+        "targetCategory": "All"
+      }
     }
   ]
 }

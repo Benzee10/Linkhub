@@ -225,7 +225,8 @@ async function startServer() {
         const blogPath = path.resolve(process.cwd(), "public", "blogs", `${postId}.json`);
         if (fs.existsSync(blogPath)) {
           const blog = JSON.parse(fs.readFileSync(blogPath, "utf-8"));
-          const blogImageUrl = getAbsoluteUrl(req, blog.coverImage);
+          const previewImage = blog.socialPreviewImage || blog.coverImage;
+          const blogImageUrl = getAbsoluteUrl(req, previewImage);
           const currentUrl = getPageUrl(req);
 
           template = injectSocialMetaTags(template, {

@@ -13,7 +13,13 @@
   "content": [
     {
       "heading": "1. Why Vetted WhatsApp Directories Matter",
-      "body": "WhatsApp groups are one of the most direct and personal ways to connect with like-minded individuals globally. Whether you are seeking regional dating circles, local city meetups, gaming crews, or professional networking spaces, group chats offer instant camaraderie. However, open web invites can sometimes harbor spam bots, abandoned rooms, or dubious links. That is why curated directories like LinkHub verify activity levels, member engagement, and group authenticity before listing."
+      "body": "WhatsApp groups are one of the most direct and personal ways to connect with like-minded individuals globally. Whether you are seeking regional dating circles, local city meetups, gaming crews, or professional networking spaces, group chats offer instant camaraderie. However, open web invites can sometimes harbor spam bots, abandoned rooms, or dubious links. That is why curated directories like LinkHub verify activity levels, member engagement, and group authenticity before listing.",
+      "whatsappCta": {
+        "title": "Looking for verified international communities?",
+        "description": "Join country and regional WhatsApp groups that are pre-screened and active.",
+        "buttonText": "Browse Country WhatsApp Groups",
+        "targetCategory": "Country Groups"
+      }
     },
     {
       "heading": "2. Essential Privacy Settings to Turn On Immediately",
@@ -21,7 +27,13 @@
     },
     {
       "heading": "3. Red Flags to Watch Out for When Joining Groups",
-      "body": "Legitimate communities have active moderators, clear purpose statements, and respectful members. Be cautious of:\n\n• Demands for payment, crypto investments, or gift cards to 'stay' in the group.\n• Unsolicited direct messages (DMs) from strangers offering quick riches or suspicious APK downloads.\n• Groups with no active discussion where only the admin posts commercial or adult links without interaction."
+      "body": "Legitimate communities have active moderators, clear purpose statements, and respectful members. Be cautious of:\n\n• Demands for payment, crypto investments, or gift cards to 'stay' in the group.\n• Unsolicited direct messages (DMs) from strangers offering quick riches or suspicious APK downloads.\n• Groups with no active discussion where only the admin posts commercial or adult links without interaction.",
+      "whatsappCta": {
+        "title": "Need safe, high-moderation groups to join?",
+        "description": "Connect with genuine people across verified groups on LinkHub without spam.",
+        "buttonText": "Explore Safe Groups",
+        "targetCategory": "All"
+      }
     },
     {
       "heading": "4. How to Be a Valuable Community Member",
@@ -29,7 +41,13 @@
     },
     {
       "heading": "5. Ready to Explore Verified Groups?",
-      "body": "Browse our curated categories right here on LinkHub—from Country Groups and Local Meetups to Dating & Friendship hubs. All featured communities are hand-screened for quality so you can connect with confidence."
+      "body": "Browse our curated categories right here on LinkHub—from Country Groups and Local Meetups to Dating & Friendship hubs. All featured communities are hand-screened for quality so you can connect with confidence.",
+      "whatsappCta": {
+        "title": "Join Verified WhatsApp Groups on LinkHub",
+        "description": "Discover dating, local, friendship, and country-based WhatsApp links today.",
+        "buttonText": "Explore All WhatsApp Groups",
+        "targetCategory": "All"
+      }
     }
   ]
 }
