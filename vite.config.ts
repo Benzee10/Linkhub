@@ -37,6 +37,7 @@ export default defineConfig(({mode}) => {
           blog: path.resolve(__dirname, 'blog.html'),
           blogPost: path.resolve(__dirname, 'blog-post.html'),
           relationshipTrust: path.resolve(__dirname, 'signs-a-woman-has-just-slept-with-another-man.html'),
+          howToMakeAGirlMissYou: path.resolve(__dirname, 'how-to-make-a-girl-miss-you.html'),
         },
       },
     },

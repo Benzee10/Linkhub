@@ -13,12 +13,14 @@ async function startServer() {
 
   // Helper to ensure full absolute canonical URL for social media preview crawlers (WhatsApp, Facebook, Twitter, Telegram, LinkedIn)
   const getAbsoluteUrl = (req: express.Request, relativeOrAbsoluteUrl: string): string => {
-    if (!relativeOrAbsoluteUrl) return "";
+    const host = req.get("x-forwarded-host") || req.get("host") || "linkhub-directory.vercel.app";
+    const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+    if (!relativeOrAbsoluteUrl) {
+      return `${proto}://${host}`;
+    }
     if (relativeOrAbsoluteUrl.startsWith("http://") || relativeOrAbsoluteUrl.startsWith("https://")) {
       return relativeOrAbsoluteUrl;
     }
-    const host = req.get("x-forwarded-host") || req.get("host") || "linkhub-directory.vercel.app";
-    const proto = req.get("x-forwarded-proto") || req.protocol || "https";
     const cleanPath = relativeOrAbsoluteUrl.startsWith("/") ? relativeOrAbsoluteUrl : `/${relativeOrAbsoluteUrl}`;
     return `${proto}://${host}${cleanPath}`;
   };
@@ -38,6 +40,8 @@ async function startServer() {
       imageUrl: string;
       pageUrl: string;
       type?: string;
+      imageWidth?: number;
+      imageHeight?: number;
     }
   ): string => {
     let result = html;
@@ -95,6 +99,28 @@ async function startServer() {
       }
     }
 
+    // og:image:type
+    const mimeType = meta.imageUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+    if (/<meta\s+property=["']og:image:type["']/i.test(result)) {
+      result = result.replace(/<meta\s+property=["']og:image:type["'][^>]*>/i, `<meta property="og:image:type" content="${mimeType}" />`);
+    } else {
+      result = result.replace('</head>', `<meta property="og:image:type" content="${mimeType}" />\n</head>`);
+    }
+
+    // og:image:width & height (Crucial for WhatsApp/Facebook instant thumbnail rendering)
+    const imgWidth = meta.imageWidth || (meta.imageUrl.includes('20261105-154753') ? 1280 : 1200);
+    const imgHeight = meta.imageHeight || (meta.imageUrl.includes('20261105-154753') ? 720 : 630);
+    if (/<meta\s+property=["']og:image:width["']/i.test(result)) {
+      result = result.replace(/<meta\s+property=["']og:image:width["'][^>]*>/i, `<meta property="og:image:width" content="${imgWidth}" />`);
+    } else {
+      result = result.replace('</head>', `<meta property="og:image:width" content="${imgWidth}" />\n</head>`);
+    }
+    if (/<meta\s+property=["']og:image:height["']/i.test(result)) {
+      result = result.replace(/<meta\s+property=["']og:image:height["'][^>]*>/i, `<meta property="og:image:height" content="${imgHeight}" />`);
+    } else {
+      result = result.replace('</head>', `<meta property="og:image:height" content="${imgHeight}" />\n</head>`);
+    }
+
     // og:url
     if (/<meta\s+property=["']og:url["']/i.test(result)) {
       result = result.replace(
@@ -130,7 +156,7 @@ async function startServer() {
       result = result.replace('</head>', `<meta property="twitter:description" content="${meta.description.replace(/"/g, '&quot;')}" />\n</head>`);
     }
 
-    // twitter:image
+    // twitter:image & twitter:image:src
     if (/<meta\s+(?:property|name)=["']twitter:image["']/i.test(result)) {
       result = result.replace(
         /<meta\s+(?:property|name)=["']twitter:image["'][^>]*>/i,
@@ -139,13 +165,27 @@ async function startServer() {
     } else {
       result = result.replace('</head>', `<meta property="twitter:image" content="${meta.imageUrl}" />\n</head>`);
     }
-
-    // twitter:url
-    if (/<meta\s+(?:property|name)=["']twitter:url["']/i.test(result)) {
+    if (/<meta\s+(?:property|name)=["']twitter:image:src["']/i.test(result)) {
       result = result.replace(
-        /<meta\s+(?:property|name)=["']twitter:url["'][^>]*>/i,
-        `<meta property="twitter:url" content="${meta.pageUrl}" />`
+        /<meta\s+(?:property|name)=["']twitter:image:src["'][^>]*>/i,
+        `<meta name="twitter:image:src" content="${meta.imageUrl}" />`
       );
+    } else {
+      result = result.replace('</head>', `<meta name="twitter:image:src" content="${meta.imageUrl}" />\n</head>`);
+    }
+
+    // WhatsApp and Schema microdata fallback tags
+    if (!/<link\s+rel=["']image_src["']/i.test(result)) {
+      result = result.replace('</head>', `<link rel="image_src" href="${meta.imageUrl}" />\n</head>`);
+    }
+    if (!/<meta\s+itemprop=["']image["']/i.test(result)) {
+      result = result.replace('</head>', `<meta itemprop="image" content="${meta.imageUrl}" />\n</head>`);
+    }
+
+    // Add local fallback og:image if sharing the postimg image
+    if (meta.imageUrl.includes('20261105-154753') && !result.includes('how-to-make-a-girl-miss-you-preview.jpg')) {
+      const localFallbackUrl = meta.pageUrl.replace(/\/[^/]*$/, '/blogs/how-to-make-a-girl-miss-you-preview.jpg');
+      result = result.replace('</head>', `<meta property="og:image" content="${localFallbackUrl}" />\n</head>`);
     }
 
     return result;
@@ -251,6 +291,18 @@ async function startServer() {
     }
   };
 
+  // Direct endpoint for post image preview
+  app.get(["/preview/how-to-make-a-girl-miss-you.jpg", "/preview-image/how-to-make-a-girl-miss-you.jpg"], (req, res) => {
+    const localImgPath = path.resolve(process.cwd(), "public", "blogs", "how-to-make-a-girl-miss-you-preview.jpg");
+    if (fs.existsSync(localImgPath)) {
+      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      return res.sendFile(localImgPath);
+    }
+    res.redirect(302, "https://i.postimg.cc/C5krM81Q/20261105-154753.jpg");
+  });
+
   // Register dynamic routes first before static middlewares
   app.get(["/post", "/post.html"], handlePostRequest);
   app.get(["/blog", "/blog.html"], handleBlogRequest);
@@ -258,8 +310,36 @@ async function startServer() {
 
   // Serve the fully rendered article at both its clean URL and its HTML path.
   app.get([
+    "/how-to-make-a-girl-miss-you",
+    "/how-to-make-a-girl-miss-you.html",
+    "/blog/how-to-make-a-girl-miss-you",
+    "/posts/how-to-make-a-girl-miss-you",
+  ], async (req, res, next) => {
+    try {
+      const filename = "how-to-make-a-girl-miss-you.html";
+      const builtPath = path.resolve(process.cwd(), "dist", filename);
+      const templatePath = process.env.NODE_ENV === "production" && fs.existsSync(builtPath)
+        ? builtPath
+        : path.resolve(process.cwd(), filename);
+      let template = fs.readFileSync(templatePath, "utf-8");
+
+      const origin = getAbsoluteUrl(req, "");
+      template = template.replaceAll("%LINKHUB_ORIGIN%", origin);
+
+      if (vite) template = await vite.transformIndexHtml(req.originalUrl, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    } catch (error) {
+      if (vite) vite.ssrFixStacktrace(error);
+      next(error);
+    }
+  });
+
+  // Serve the relationship trust article at both its clean URL and its HTML path.
+  app.get([
     "/signs-a-woman-has-just-slept-with-another-man",
     "/signs-a-woman-has-just-slept-with-another-man.html",
+    "/blog/signs-a-woman-has-just-slept-with-another-man",
+    "/posts/signs-a-woman-has-just-slept-with-another-man",
   ], async (req, res, next) => {
     try {
       const filename = "signs-a-woman-has-just-slept-with-another-man.html";
@@ -268,6 +348,10 @@ async function startServer() {
         ? builtPath
         : path.resolve(process.cwd(), filename);
       let template = fs.readFileSync(templatePath, "utf-8");
+
+      const origin = getAbsoluteUrl(req, "");
+      template = template.replaceAll("%LINKHUB_ORIGIN%", origin);
+
       if (vite) template = await vite.transformIndexHtml(req.originalUrl, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(template);
     } catch (error) {
