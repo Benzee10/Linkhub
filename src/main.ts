@@ -1,9 +1,11 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initTelegramPromo } from './telegram-promo';
 import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
 
 inject();
+initTelegramPromo();
 
 interface Post {
   id: string;

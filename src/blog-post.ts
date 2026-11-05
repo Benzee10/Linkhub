@@ -1,11 +1,13 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initTelegramPromo } from './telegram-promo';
 import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
 import { CONFIG } from './config';
 import { getBlogPostById, BlogPost as BlogPostDetail, BlogPostSection as ContentSection } from './posts';
 
 inject();
+initTelegramPromo();
 
 function showToast(message: string) {
   const toast = document.getElementById('toast');
