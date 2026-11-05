@@ -56,24 +56,20 @@ test('unavailable storage never causes repeated popups or an exception', () => {
   assert.equal(reserveTelegramPromo(unavailableWrite, now), false);
 });
 
-test('all three supplied images are evenly selectable with full fallback coverage and exact Telegram URL', () => {
+test('all supplied images are evenly selectable with full fallback coverage and exact Telegram URL', () => {
   assert.deepEqual(TELEGRAM_PROMO_IMAGES, [
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKR-P4uTl9HQAOUhNgIoGevo4TIMcL8fB0qX-eM3AFmA&s',
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8MMFA5UM4bFehDD9adrrG0eRtwLyX13M-grIA5K3YYQ&s',
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSWyD4ShSOFlCw2GUE2kqA6_Gh12HvrmEVzCQiaaRxxCuO8E-wpIGZGD3J&s=10',
+    'https://i.postimg.cc/KYPF11H3/3-54-1.webp',
+    'https://i.postimg.cc/gkzwmWrQ/5-34.webp',
   ]);
 
   assert.equal(chooseTelegramPromoImage(0), TELEGRAM_PROMO_IMAGES[0]);
-  assert.equal(chooseTelegramPromoImage(0.33), TELEGRAM_PROMO_IMAGES[0]);
-  assert.equal(chooseTelegramPromoImage(1 / 3), TELEGRAM_PROMO_IMAGES[1]);
-  assert.equal(chooseTelegramPromoImage(0.66), TELEGRAM_PROMO_IMAGES[1]);
-  assert.equal(chooseTelegramPromoImage(0.67), TELEGRAM_PROMO_IMAGES[2]);
-  assert.equal(chooseTelegramPromoImage(0.9999), TELEGRAM_PROMO_IMAGES[2]);
-  assert.equal(chooseTelegramPromoImage(1), TELEGRAM_PROMO_IMAGES[2]);
+  assert.equal(chooseTelegramPromoImage(0.49), TELEGRAM_PROMO_IMAGES[0]);
+  assert.equal(chooseTelegramPromoImage(0.5), TELEGRAM_PROMO_IMAGES[1]);
+  assert.equal(chooseTelegramPromoImage(0.9999), TELEGRAM_PROMO_IMAGES[1]);
+  assert.equal(chooseTelegramPromoImage(1), TELEGRAM_PROMO_IMAGES[1]);
 
   assert.deepEqual(getTelegramPromoImageQueue(0.5), [
     TELEGRAM_PROMO_IMAGES[1],
-    TELEGRAM_PROMO_IMAGES[2],
     TELEGRAM_PROMO_IMAGES[0],
   ]);
 

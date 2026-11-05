@@ -90,33 +90,33 @@ function updateMetaTags(post: PostDetail) {
 
 function createGroupCard(group: Group) {
   const card = document.createElement('div');
-  card.className = 'bg-white/5 dark:bg-slate-800/50 backdrop-blur-xl border border-white/10 dark:border-slate-700/50 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-white/10 dark:hover:bg-slate-800 transition-all duration-500 group';
+  card.className = 'bg-white/5 dark:bg-slate-800/50 backdrop-blur-xl border border-white/10 dark:border-slate-700/50 p-5 sm:p-8 rounded-[1.75rem] sm:rounded-[2rem] flex flex-col md:flex-row items-start sm:items-center justify-between gap-5 sm:gap-8 hover:bg-white/10 dark:hover:bg-slate-800 transition-all duration-300 group';
   
   const effectiveLink = CONFIG.JOIN_REDIRECT_LINK;
 
   card.innerHTML = `
-    <div class="flex-1 text-center md:text-left">
-      <div class="flex flex-col md:flex-row items-center gap-4 mb-3">
-        <h3 class="text-2xl font-bold text-white font-display group-hover:text-emerald-400 transition-colors">${group.name}</h3>
+    <div class="flex-1 text-left w-full">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-2.5">
+        <h3 class="text-xl sm:text-2xl font-bold text-white font-display group-hover:text-emerald-400 transition-colors">${group.name}</h3>
         <div class="flex items-center gap-2">
-          ${group.members ? `<span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">${group.members} Members</span>` : ''}
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 flex items-center gap-1">
+          ${group.members ? `<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">${group.members} Members</span>` : ''}
+          <span class="opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             Verified
           </span>
         </div>
       </div>
-      <p class="text-slate-400 dark:text-slate-300 text-base leading-relaxed max-w-xl group-hover:text-white transition-colors">${group.description}</p>
+      <p class="text-slate-400 dark:text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl group-hover:text-white transition-colors">${group.description}</p>
     </div>
-    <div class="flex items-center gap-4 w-full md:w-auto">
-      <button class="copy-btn p-4 rounded-2xl bg-white/5 dark:bg-slate-700/50 text-slate-400 hover:text-white hover:bg-white/10 dark:hover:bg-slate-700 transition-all border border-white/5 dark:border-slate-700" data-link="${effectiveLink}" title="Copy Link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+    <div class="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
+      <button class="copy-btn min-w-[48px] min-h-[48px] p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 dark:bg-slate-700/50 text-slate-400 hover:text-white hover:bg-white/10 dark:hover:bg-slate-700 transition-all border border-white/5 dark:border-slate-700 flex items-center justify-center active:scale-95" data-link="${effectiveLink}" title="Copy Link" aria-label="Copy group link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
       </button>
       <a 
         href="${effectiveLink}" 
         target="_blank" 
         rel="noopener noreferrer"
-        class="join-btn flex-1 md:flex-none inline-flex items-center justify-center py-4 px-10 rounded-2xl bg-emerald-500 text-slate-900 font-extrabold hover:bg-white hover:text-slate-900 transition-all shadow-2xl shadow-emerald-500/20"
+        class="join-btn flex-1 md:flex-none inline-flex items-center justify-center min-h-[48px] py-3.5 px-6 sm:px-10 rounded-xl sm:rounded-2xl bg-emerald-500 text-slate-900 font-extrabold text-sm sm:text-base hover:bg-white hover:text-slate-900 transition-all shadow-xl shadow-emerald-500/20 active:scale-[0.98]"
       >
         JOIN NOW
       </a>
