@@ -1,0 +1,196 @@
+body.telegram-promo-open {
+  overflow: hidden;
+}
+
+.telegram-promo {
+  position: fixed;
+  inset: 0;
+  width: min(24rem, calc(100vw - 1.75rem));
+  max-width: calc(100vw - 1.75rem);
+  max-height: calc(100vh - 1.75rem);
+  max-height: calc(100dvh - 1.75rem);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 1.5rem;
+  background: transparent;
+  overflow: visible;
+}
+
+.telegram-promo::backdrop {
+  background: rgba(2, 6, 23, 0.76);
+  backdrop-filter: blur(8px);
+}
+
+.telegram-promo__card {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 1.75rem);
+  max-height: calc(100dvh - 1.75rem);
+  overflow: auto;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.5rem;
+  color: #0f172a;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(2, 6, 23, 0.45);
+}
+
+.dark .telegram-promo__card {
+  border-color: rgba(51, 65, 85, 0.85);
+  color: #f8fafc;
+  background: #0f172a;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.7);
+}
+
+.telegram-promo__header {
+  position: relative;
+  padding: 1.15rem 3.75rem 0.9rem 1.2rem;
+}
+
+.telegram-promo__eyebrow {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #059669;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.dark .telegram-promo__eyebrow {
+  color: #34d399;
+}
+
+.telegram-promo__title {
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-display, "Outfit", ui-sans-serif, system-ui, sans-serif);
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.telegram-promo__close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.75rem;
+  color: #475569;
+  background: #f1f5f9;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.telegram-promo__close:hover {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+.dark .telegram-promo__close {
+  color: #cbd5e1;
+  background: #1e293b;
+}
+
+.dark .telegram-promo__close:hover {
+  color: #ffffff;
+  background: #334155;
+}
+
+.telegram-promo__close:focus-visible,
+.telegram-promo__image-link:focus-visible,
+.telegram-promo__button:focus-visible {
+  outline: 2px solid #2aabee;
+  outline-offset: 2px;
+}
+
+.telegram-promo__media {
+  padding: 0 1rem;
+}
+
+.telegram-promo__image-link {
+  display: flex;
+  min-height: 11rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 1.05rem;
+  background: #0b1220;
+  text-decoration: none;
+}
+
+.telegram-promo__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(52vh, 23rem);
+  max-height: min(52dvh, 23rem);
+  object-fit: contain;
+  transition: transform 220ms ease;
+}
+
+.telegram-promo__image-link:hover .telegram-promo__image {
+  transform: scale(1.02);
+}
+
+.telegram-promo__fallback {
+  padding: 2.5rem 1.25rem;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.telegram-promo__footer {
+  padding: 1rem 1rem 1.15rem;
+}
+
+.telegram-promo__button {
+  display: flex;
+  min-height: 3.1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 0.95rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2aabee 0%, #1689c7 100%);
+  box-shadow: 0 10px 24px rgba(22, 137, 199, 0.3);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.telegram-promo__button:hover {
+  filter: brightness(1.06);
+}
+
+.telegram-promo__button:active {
+  transform: scale(0.99);
+}
+
+@media (max-width: 380px) {
+  .telegram-promo__header {
+    padding: 1rem 3.4rem 0.8rem 1rem;
+  }
+
+  .telegram-promo__media {
+    padding: 0 0.85rem;
+  }
+
+  .telegram-promo__footer {
+    padding: 0.9rem 0.85rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .telegram-promo__close,
+  .telegram-promo__image,
+  .telegram-promo__button {
+    transition: none;
+  }
+}

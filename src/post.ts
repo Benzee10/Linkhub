@@ -1,10 +1,14 @@
 import './index.css';
 import { initTheme } from './theme';
+import { initTelegramPromo } from './telegram-promo';
 import { initMobileMenu } from './navigation';
 import { CONFIG } from './config';
 import { inject } from '@vercel/analytics';
 
 inject();
+if (new URLSearchParams(window.location.search).get('id')) {
+  initTelegramPromo();
+}
 
 interface Group {
   name: string;
