@@ -14,10 +14,13 @@ export function initMobileMenu() {
 
   if (!toggleBtn || !drawer) return;
 
+  // Keep off-screen links out of the keyboard focus order while the menu is closed.
+  drawer.setAttribute('inert', '');
   let isOpen = false;
 
   const openMenu = () => {
     isOpen = true;
+    drawer.removeAttribute('inert');
     drawer.classList.remove('translate-x-full');
     drawer.classList.add('translate-x-0');
     if (overlay) {
@@ -34,6 +37,7 @@ export function initMobileMenu() {
 
   const closeMenu = () => {
     isOpen = false;
+    drawer.setAttribute('inert', '');
     drawer.classList.remove('translate-x-0');
     drawer.classList.add('translate-x-full');
     if (overlay) {

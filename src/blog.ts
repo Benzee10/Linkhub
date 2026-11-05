@@ -10,6 +10,8 @@ interface BlogPostPreview {
   title: string;
   excerpt: string;
   coverImage: string;
+  imageAlt?: string;
+  url?: string;
   category: string;
   author: string;
   readTime: string;
@@ -29,6 +31,7 @@ async function fetchBlogPosts(): Promise<BlogPostPreview[]> {
 
 function createBlogCard(post: BlogPostPreview): HTMLElement {
   const card = document.createElement('article');
+  const articleUrl = post.url || `/blog-post.html?id=${encodeURIComponent(post.id)}`;
   card.className = 'premium-card group flex flex-col justify-between h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 dark:shadow-none hover:-translate-y-1 transition-all duration-300';
 
   card.innerHTML = `
@@ -36,7 +39,7 @@ function createBlogCard(post: BlogPostPreview): HTMLElement {
       <div class="aspect-[16/10] overflow-hidden relative rounded-[1.5rem] mb-6">
         <img 
           src="${post.coverImage}" 
-          alt="${post.title}" 
+          alt="${post.imageAlt || post.title}"
           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           loading="lazy"
         />
@@ -70,7 +73,7 @@ function createBlogCard(post: BlogPostPreview): HTMLElement {
         <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">${post.author}</span>
       </div>
       <a 
-        href="/blog-post.html?id=${post.id}" 
+        href="${articleUrl}"
         class="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 group/link"
       >
         <span>Read Article</span>

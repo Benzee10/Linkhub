@@ -255,6 +255,26 @@ async function startServer() {
   app.get(["/blog", "/blog.html"], handleBlogRequest);
   app.get(["/blog-post", "/blog-post.html"], handleBlogPostRequest);
 
+  // Serve the fully rendered article at both its clean URL and its HTML path.
+  app.get([
+    "/signs-a-woman-has-just-slept-with-another-man",
+    "/signs-a-woman-has-just-slept-with-another-man.html",
+  ], async (req, res, next) => {
+    try {
+      const filename = "signs-a-woman-has-just-slept-with-another-man.html";
+      const builtPath = path.resolve(process.cwd(), "dist", filename);
+      const templatePath = process.env.NODE_ENV === "production" && fs.existsSync(builtPath)
+        ? builtPath
+        : path.resolve(process.cwd(), filename);
+      let template = fs.readFileSync(templatePath, "utf-8");
+      if (vite) template = await vite.transformIndexHtml(req.originalUrl, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    } catch (error) {
+      if (vite) vite.ssrFixStacktrace(error);
+      next(error);
+    }
+  });
+
   // Vite middleware for development (after custom HTML routes)
   let vite: any;
   if (process.env.NODE_ENV !== "production") {
