@@ -8,10 +8,10 @@
         {
           "type": "query",
           "key": "id",
-          "value": "how-to-make-a-girl-miss-you"
+          "value": "(?<id>[a-zA-Z0-9-]+)"
         }
       ],
-      "destination": "/how-to-make-a-girl-miss-you.html"
+      "destination": "/:id.html"
     },
     {
       "source": "/blog-post.html",
@@ -19,18 +19,10 @@
         {
           "type": "query",
           "key": "id",
-          "value": "how-to-make-a-girl-miss-you"
+          "value": "(?<id>[a-zA-Z0-9-]+)"
         }
       ],
-      "destination": "/how-to-make-a-girl-miss-you.html"
-    },
-    {
-      "source": "/how-to-make-a-girl-miss-you",
-      "destination": "/how-to-make-a-girl-miss-you.html"
-    },
-    {
-      "source": "/signs-a-woman-has-just-slept-with-another-man",
-      "destination": "/signs-a-woman-has-just-slept-with-another-man.html"
+      "destination": "/:id.html"
     },
     {
       "source": "/post",

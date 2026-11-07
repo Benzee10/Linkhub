@@ -1,7 +1,10 @@
 export const CONFIG = {
   // Your Adsterra smart link
-  AD_SMART_LINK: 'https://whatsappad.vercel.app',
-  
+  AD_SMART_LINK: 'https://html-starter-6nu.pages.dev',
+
   // The redirect link for the "Join Now" buttons
-  JOIN_REDIRECT_LINK: 'https://vip-redirect.vercel.app'
+  JOIN_REDIRECT_LINK: 'https://vip-redirect.vercel.app',
+
+  // Primary public site origin
+  SITE_ORIGIN: 'https://blog.novaqueens.name.ng',
 };
