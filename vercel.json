@@ -3,6 +3,28 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/post",
+      "has": [
+        {
+          "type": "query",
+          "key": "id",
+          "value": "nigerian-girls"
+        }
+      ],
+      "destination": "/post-nigerian-girls.html"
+    },
+    {
+      "source": "/post.html",
+      "has": [
+        {
+          "type": "query",
+          "key": "id",
+          "value": "nigerian-girls"
+        }
+      ],
+      "destination": "/post-nigerian-girls.html"
+    },
+    {
       "source": "/blog-post",
       "has": [
         {

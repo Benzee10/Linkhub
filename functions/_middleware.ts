@@ -82,6 +82,135 @@ function resolveAbsoluteUrl(rawUrl: string, origin: string): string {
   return new URL(rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`, origin).href;
 }
 
+function detectImageMime(bytes: Uint8Array): string | null {
+  if (bytes.length < 12) return null;
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return 'image/jpeg';
+  }
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    return 'image/png';
+  }
+  if (
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
+    return 'image/webp';
+  }
+  return null;
+}
+
+async function proxyRemoteSocialImage(
+  primaryUrl: string,
+  fallbackUrl: string | undefined,
+  method: string,
+): Promise<Response | null> {
+  const candidates = [primaryUrl];
+  if (fallbackUrl && !candidates.includes(fallbackUrl)) {
+    candidates.push(fallbackUrl);
+  }
+
+  for (let i = 0; i < candidates.length; i++) {
+    const candidate = candidates[i];
+    try {
+      const upstream = await fetch(candidate, {
+        headers: {
+          Accept: 'image/jpeg,image/png,image/webp,image/*;q=0.9,*/*;q=0.1',
+          Referer: 'https://postimg.cc/',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        },
+        redirect: 'follow',
+      });
+      if (!upstream.ok) continue;
+
+      const bytes = new Uint8Array(await upstream.arrayBuffer());
+      const mime = detectImageMime(bytes);
+      if (mime) {
+        return new Response(method === 'HEAD' ? null : bytes, {
+          status: 200,
+          headers: {
+            'Content-Type': mime,
+            'Cache-Control': 'public, max-age=86400, s-maxage=604800',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+
+      const contentType = upstream.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        const html = new TextDecoder().decode(bytes);
+        const dlMatch = html.match(/https:\/\/i\.postimg\.cc\/[^"'\s>]+\?dl=1/i);
+        if (dlMatch && !candidates.includes(dlMatch[0])) {
+          candidates.push(dlMatch[0]);
+        }
+      }
+    } catch {
+      // Try next candidate
+    }
+  }
+
+  return null;
+}
+
+async function handlePreviewImageRequest(
+  context: PagesMiddlewareContext,
+  slug: string,
+  origin: string,
+): Promise<Response> {
+  // Prefer static build-time downloaded image if present in dist/preview/<slug>.jpg
+  const staticRes = await context.next();
+  const staticType = staticRes.headers.get('content-type') || '';
+  if (staticRes.status === 200 && staticType.startsWith('image/')) {
+    return staticRes;
+  }
+
+  if (!context.env.ASSETS) {
+    return staticRes;
+  }
+
+  try {
+    const postRes = await context.env.ASSETS.fetch(
+      new Request(new URL(`/posts/${slug}.json`, origin).href),
+    );
+    if (!postRes.ok) {
+      return staticRes;
+    }
+
+    const postData = (await postRes.json()) as Record<string, unknown>;
+    const sourceUrl =
+      typeof postData.socialPreviewImageSource === 'string'
+        ? postData.socialPreviewImageSource
+        : '';
+    const fallbackUrl =
+      typeof postData.socialPreviewImageFallback === 'string'
+        ? postData.socialPreviewImageFallback
+        : undefined;
+
+    if (!sourceUrl) {
+      return staticRes;
+    }
+
+    const proxied = await proxyRemoteSocialImage(
+      sourceUrl,
+      fallbackUrl,
+      context.request.method,
+    );
+    if (proxied) {
+      return proxied;
+    }
+  } catch {
+    // Fall through to static response
+  }
+
+  return staticRes;
+}
+
 export async function onRequest(context: PagesMiddlewareContext): Promise<Response> {
   const { request, env } = context;
   if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -90,6 +219,12 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
 
   const url = new URL(request.url);
   const { pathname } = url;
+
+  const previewMatch = pathname.match(/^\/preview\/([a-z0-9-]+)\.(?:jpg|jpeg|png|webp)$/i);
+  if (previewMatch) {
+    return handlePreviewImageRequest(context, previewMatch[1], url.origin);
+  }
+
   const isBlogPost = pathname === '/blog-post' || pathname === '/blog-post.html';
   const isDirectoryPost = pathname === '/post' || pathname === '/post.html';
 
@@ -131,7 +266,7 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
 
     const rawImage = isBlogPost
       ? String(data.socialPreviewImage || data.coverImage || '')
-      : String(data.image || '');
+      : String(data.socialPreviewImage || data.image || '');
     if (!rawImage) {
       return response;
     }

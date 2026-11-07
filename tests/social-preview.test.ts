@@ -10,6 +10,7 @@ import {
   loadBlogPostById,
   prerenderBlogPostHtml,
 } from '../scripts/blog-build';
+import { detectImageMetadata } from '../scripts/social-image-fetch';
 
 const rootDir = process.cwd();
 
@@ -133,4 +134,88 @@ test('Cloudflare Pages middleware injects how-to-make-a-girl-miss-you preview im
   const otherHtml = await otherRes.text();
   assert.equal(otherHtml.includes('how-to-make-a-girl-miss-you-preview.jpg'), false);
   assert.match(otherHtml, /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/blogs\/romantic-girlfriend-featured\.png" \/>/);
+});
+
+test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without changing in-post or card image', async () => {
+  const nigerianGirls = JSON.parse(
+    fs.readFileSync(path.join(rootDir, 'public/posts/nigerian-girls.json'), 'utf-8'),
+  );
+  const postsIndex = JSON.parse(
+    fs.readFileSync(path.join(rootDir, 'public/posts/index.json'), 'utf-8'),
+  ) as Array<{ id: string; image: string }>;
+  const indexEntry = postsIndex.find(item => item.id === 'nigerian-girls');
+
+  // In-post #post-image and homepage card image must NOT show the social preview image
+  assert.equal(
+    nigerianGirls.image,
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10',
+  );
+  assert.equal(indexEntry?.image, nigerianGirls.image);
+  assert.equal(nigerianGirls.socialPreviewImage, '/preview/nigerian-girls.jpg');
+  assert.equal(nigerianGirls.socialPreviewImageSource, 'https://i.postimg.cc/L4ZN5KX2/20261107-110742.jpg');
+
+  const postTemplate = fs.readFileSync(path.join(rootDir, 'post.html'), 'utf-8');
+  const nigerianJson = fs.readFileSync(path.join(rootDir, 'public/posts/nigerian-girls.json'), 'utf-8');
+  const kenyanJson = fs.readFileSync(path.join(rootDir, 'public/posts/kenyan-girls.json'), 'utf-8');
+
+  const assets = {
+    async fetch(input: Request | URL | string) {
+      const reqUrl = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
+      if (reqUrl.pathname === '/post') {
+        return new Response(postTemplate, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
+      }
+      if (reqUrl.pathname === '/posts/nigerian-girls.json') {
+        return new Response(nigerianJson, { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      if (reqUrl.pathname === '/posts/kenyan-girls.json') {
+        return new Response(kenyanJson, { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      return new Response('Not found', { status: 404 });
+    },
+  };
+
+  // Both /post.html?id=nigerian-girls and /post?id=nigerian-girls inject the Nigerian Girls preview image
+  const ngRes = await onRequest({
+    request: new Request('https://blog.novaqueens.name.ng/post.html?id=nigerian-girls'),
+    next: async () => new Response(null, { status: 308, headers: { location: '/post?id=nigerian-girls' } }),
+    env: { ASSETS: assets },
+  });
+  assert.equal(ngRes.status, 200);
+  const ngHtml = await ngRes.text();
+  assert.match(ngHtml, /<title>Nigerian Girls WhatsApp Group Links \| LinkHub<\/title>/);
+  assert.match(
+    ngHtml,
+    /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/nigerian-girls\.jpg" \/>/,
+  );
+  assert.match(
+    ngHtml,
+    /<meta property="og:image:secure_url" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/nigerian-girls\.jpg" \/>/,
+  );
+  assert.match(
+    ngHtml,
+    /<meta name="twitter:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/nigerian-girls\.jpg" \/>/,
+  );
+  // Ensure post.html body does NOT contain the preview image inside the post
+  const bodyHtml = ngHtml.split('</head>')[1] || '';
+  assert.equal(bodyHtml.includes('nigerian-girls.jpg'), false);
+  assert.equal(bodyHtml.includes('20261107-110742.jpg'), false);
+
+  // Other directory posts remain unaffected
+  const keRes = await onRequest({
+    request: new Request('https://blog.novaqueens.name.ng/post?id=kenyan-girls'),
+    next: async () => new Response(postTemplate, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }),
+    env: { ASSETS: assets },
+  });
+  const keHtml = await keRes.text();
+  assert.equal(keHtml.includes('/preview/nigerian-girls.jpg'), false);
+
+  // Verify detectImageMetadata accurately parses JPEG dimensions
+  const sampleJpeg = new Uint8Array(
+    fs.readFileSync(path.join(rootDir, 'public/blogs/how-to-make-a-girl-miss-you-preview.jpg')),
+  );
+  assert.deepEqual(detectImageMetadata(sampleJpeg), {
+    width: 1280,
+    height: 720,
+    mimeType: 'image/jpeg',
+  });
 });

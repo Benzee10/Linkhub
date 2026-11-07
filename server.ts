@@ -9,6 +9,7 @@ import {
   loadBlogPostById,
   prerenderBlogPostHtml,
 } from "./scripts/blog-build";
+import { fetchVerifiedImageBytes } from "./scripts/social-image-fetch";
 
 const DEFAULT_HOST = new URL(CONFIG.SITE_ORIGIN).host;
 
@@ -128,15 +129,47 @@ async function startServer() {
     res.status(200).json(post);
   });
 
-  // Direct endpoint for post image preview
-  app.get(["/preview/how-to-make-a-girl-miss-you.jpg", "/preview-image/how-to-make-a-girl-miss-you.jpg"], (_req, res) => {
-    const localImgPath = path.resolve(rootDir, "public", "blogs", "how-to-make-a-girl-miss-you-preview.jpg");
-    if (fs.existsSync(localImgPath)) {
-      res.setHeader("Content-Type", "image/jpeg");
-      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      return res.sendFile(localImgPath);
+  // Direct endpoint for post image previews
+  app.get(["/preview/:slug.jpg", "/preview-image/:slug.jpg"], async (req, res) => {
+    const { slug } = req.params;
+    if (!/^[a-z0-9-]+$/i.test(slug)) {
+      return res.status(404).end();
     }
+
+    const candidateLocalPaths = [
+      path.resolve(rootDir, "dist", "preview", `${slug}.jpg`),
+      path.resolve(rootDir, "public", "preview", `${slug}.jpg`),
+      path.resolve(rootDir, "public", "blogs", `${slug}-preview.jpg`),
+    ];
+
+    for (const localPath of candidateLocalPaths) {
+      if (fs.existsSync(localPath)) {
+        res.setHeader("Content-Type", "image/jpeg");
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        return res.sendFile(localPath);
+      }
+    }
+
+    const postDataPath = path.resolve(rootDir, "public", "posts", `${slug}.json`);
+    if (fs.existsSync(postDataPath)) {
+      const post = JSON.parse(fs.readFileSync(postDataPath, "utf-8"));
+      if (post.socialPreviewImageSource) {
+        const fetched = await fetchVerifiedImageBytes(
+          post.socialPreviewImageSource,
+          post.socialPreviewImageFallback,
+          3000
+        );
+        if (fetched) {
+          res.setHeader("Content-Type", fetched.meta.mimeType);
+          res.setHeader("Cache-Control", "public, max-age=86400");
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          return res.status(200).send(Buffer.from(fetched.bytes));
+        }
+        return res.redirect(302, post.socialPreviewImageFallback || post.socialPreviewImageSource);
+      }
+    }
+
     res.status(404).end();
   });
 
@@ -152,14 +185,17 @@ async function startServer() {
 
       let template = fs.readFileSync(templatePath, "utf-8").replaceAll("%LINKHUB_ORIGIN%", getOrigin(req));
 
-      if (postId) {
+      if (postId && /^[a-z0-9-]+$/i.test(postId)) {
         const postDataPath = path.resolve(rootDir, "public", "posts", `${postId}.json`);
         if (fs.existsSync(postDataPath)) {
           const post = JSON.parse(fs.readFileSync(postDataPath, "utf-8"));
+          const previewImage = post.socialPreviewImage || post.image;
           template = injectSocialMetaTags(template, {
             title: `${post.title} | LinkHub`,
             description: post.description,
-            imageUrl: getAbsoluteUrl(req, post.image),
+            imageUrl: getAbsoluteUrl(req, previewImage),
+            imageWidth: post.socialPreviewImageWidth,
+            imageHeight: post.socialPreviewImageHeight,
             pageUrl: getPageUrl(req),
           });
         }

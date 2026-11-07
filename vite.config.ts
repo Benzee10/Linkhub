@@ -10,6 +10,7 @@ import {
   loadAllBlogPosts,
   prerenderBlogPostHtml,
 } from './scripts/blog-build';
+import { buildDirectoryPostSocialPreviews } from './scripts/social-image-fetch';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -44,8 +45,10 @@ export default defineConfig(({ mode }) => {
             return transformed;
           },
         },
-        closeBundle() {
+        async closeBundle() {
           const distDir = path.resolve(rootDir, 'dist');
+          await buildDirectoryPostSocialPreviews(rootDir, distDir, productionOrigin);
+
           const blogPostTemplatePath = path.join(distDir, 'blog-post.html');
           if (!fs.existsSync(blogPostTemplatePath)) return;
 
