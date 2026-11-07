@@ -22,6 +22,7 @@ interface PostDetail {
   title: string;
   description: string;
   image: string;
+  socialPreviewImage?: string;
   category: string;
   intro: string;
   content: string;
@@ -61,9 +62,10 @@ function updateMetaTags(post: PostDetail) {
   const ogDescription = document.querySelector('meta[property="og:description"]');
   if (ogDescription) ogDescription.setAttribute('content', post.description);
 
-  const absoluteImage = post.image.startsWith('http') 
-    ? post.image 
-    : `${window.location.origin}${post.image.startsWith('/') ? post.image : '/' + post.image}`;
+  const rawPreviewImage = post.socialPreviewImage || post.image;
+  const absoluteImage = rawPreviewImage.startsWith('http') 
+    ? rawPreviewImage 
+    : `${window.location.origin}${rawPreviewImage.startsWith('/') ? rawPreviewImage : '/' + rawPreviewImage}`;
 
   const ogImage = document.querySelector('meta[property="og:image"]');
   if (ogImage) ogImage.setAttribute('content', absoluteImage);
@@ -75,16 +77,19 @@ function updateMetaTags(post: PostDetail) {
   if (ogUrl) ogUrl.setAttribute('content', window.location.href);
 
   // Update Twitter
-  const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+  const twitterTitle = document.querySelector('meta[property="twitter:title"], meta[name="twitter:title"]');
   if (twitterTitle) twitterTitle.setAttribute('content', post.title);
 
-  const twitterDescription = document.querySelector('meta[property="twitter:description"]');
+  const twitterDescription = document.querySelector('meta[property="twitter:description"], meta[name="twitter:description"]');
   if (twitterDescription) twitterDescription.setAttribute('content', post.description);
 
-  const twitterImage = document.querySelector('meta[property="twitter:image"]');
+  const twitterImage = document.querySelector('meta[property="twitter:image"], meta[name="twitter:image"]');
   if (twitterImage) twitterImage.setAttribute('content', absoluteImage);
 
-  const twitterUrl = document.querySelector('meta[property="twitter:url"]');
+  const twitterImageSrc = document.querySelector('meta[property="twitter:image:src"], meta[name="twitter:image:src"]');
+  if (twitterImageSrc) twitterImageSrc.setAttribute('content', absoluteImage);
+
+  const twitterUrl = document.querySelector('meta[property="twitter:url"], meta[name="twitter:url"]');
   if (twitterUrl) twitterUrl.setAttribute('content', window.location.href);
 }
 
