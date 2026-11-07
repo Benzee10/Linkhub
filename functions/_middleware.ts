@@ -1,3 +1,9 @@
+import {
+  getRemoteSocialPreviewSource,
+  resolveBlogPostPreviewImage,
+  resolveDirectoryPostPreviewImage,
+} from '../src/social-preview';
+
 interface PagesAssetFetcher {
   fetch(input: Request | URL | string): Promise<Response>;
 }
@@ -145,9 +151,12 @@ async function proxyRemoteSocialImage(
       const contentType = upstream.headers.get('content-type') || '';
       if (contentType.includes('text/html')) {
         const html = new TextDecoder().decode(bytes);
-        const dlMatch = html.match(/https:\/\/i\.postimg\.cc\/[^"'\s>]+\?dl=1/i);
-        if (dlMatch && !candidates.includes(dlMatch[0])) {
-          candidates.push(dlMatch[0]);
+        const dlMatches = html.match(/https:\/\/i\.postimg\.cc\/[^"'\s<>]+\?dl=1/gi) || [];
+        for (const matchUrl of dlMatches) {
+          const cleanUrl = matchUrl.replaceAll('&amp;', '&');
+          if (!candidates.includes(cleanUrl)) {
+            candidates.push(cleanUrl);
+          }
         }
       }
     } catch {
@@ -183,10 +192,7 @@ async function handlePreviewImageRequest(
     }
 
     const postData = (await postRes.json()) as Record<string, unknown>;
-    const sourceUrl =
-      typeof postData.socialPreviewImageSource === 'string'
-        ? postData.socialPreviewImageSource
-        : '';
+    const sourceUrl = getRemoteSocialPreviewSource(postData) || '';
     const fallbackUrl =
       typeof postData.socialPreviewImageFallback === 'string'
         ? postData.socialPreviewImageFallback
@@ -265,8 +271,15 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
     }
 
     const rawImage = isBlogPost
-      ? String(data.socialPreviewImage || data.coverImage || '')
-      : String(data.socialPreviewImage || data.image || '');
+      ? resolveBlogPostPreviewImage({
+          coverImage: String(data.coverImage || ''),
+          socialPreviewImage: data.socialPreviewImage,
+        })
+      : resolveDirectoryPostPreviewImage({
+          id,
+          image: String(data.image || ''),
+          socialPreviewImage: data.socialPreviewImage,
+        });
     if (!rawImage) {
       return response;
     }

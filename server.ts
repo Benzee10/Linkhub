@@ -4,6 +4,10 @@ import path from "path";
 import fs from "fs";
 import { CONFIG } from "./src/config";
 import {
+  getRemoteSocialPreviewSource,
+  resolveDirectoryPostPreviewImage,
+} from "./src/social-preview";
+import {
   buildBlogIndex,
   loadAllBlogPosts,
   loadBlogPostById,
@@ -154,9 +158,10 @@ async function startServer() {
     const postDataPath = path.resolve(rootDir, "public", "posts", `${slug}.json`);
     if (fs.existsSync(postDataPath)) {
       const post = JSON.parse(fs.readFileSync(postDataPath, "utf-8"));
-      if (post.socialPreviewImageSource) {
+      const remoteSource = getRemoteSocialPreviewSource(post);
+      if (remoteSource) {
         const fetched = await fetchVerifiedImageBytes(
-          post.socialPreviewImageSource,
+          remoteSource,
           post.socialPreviewImageFallback,
           3000
         );
@@ -166,7 +171,7 @@ async function startServer() {
           res.setHeader("Access-Control-Allow-Origin", "*");
           return res.status(200).send(Buffer.from(fetched.bytes));
         }
-        return res.redirect(302, post.socialPreviewImageFallback || post.socialPreviewImageSource);
+        return res.redirect(302, post.socialPreviewImageFallback || remoteSource);
       }
     }
 
@@ -189,7 +194,11 @@ async function startServer() {
         const postDataPath = path.resolve(rootDir, "public", "posts", `${postId}.json`);
         if (fs.existsSync(postDataPath)) {
           const post = JSON.parse(fs.readFileSync(postDataPath, "utf-8"));
-          const previewImage = post.socialPreviewImage || post.image;
+          const previewImage = resolveDirectoryPostPreviewImage({
+            id: post.id || postId,
+            image: post.image,
+            socialPreviewImage: post.socialPreviewImage,
+          });
           template = injectSocialMetaTags(template, {
             title: `${post.title} | LinkHub`,
             description: post.description,

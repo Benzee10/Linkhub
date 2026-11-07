@@ -3,6 +3,7 @@
   "title": "Welcome to LinkHub",
   "description": "Your directory is ready. Start adding your WhatsApp group links today!",
   "image": "https://picsum.photos/seed/linkhub-welcome/800/600",
+  "socialPreviewImage": "PASTE_PREVIEW_IMAGE_LINK_HERE",
   "category": "General",
   "intro": "Welcome to your new LinkHub directory!",
   "content": "This is a placeholder post. You can delete it once you've added your own communities. LinkHub helps you organize and share WhatsApp group links with ease.",
