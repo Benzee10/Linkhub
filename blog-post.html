@@ -7,7 +7,7 @@
     <meta name="description" content="Read community safety and discovery guides on LinkHub." />
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://linkhub-directory.vercel.app/blog-post.html" />
+    <meta property="og:url" content="%LINKHUB_ORIGIN%/blog-post.html" />
     <meta property="og:site_name" content="LinkHub" />
     <meta property="og:title" content="Blog Post | LinkHub" />
     <meta property="og:description" content="Read community safety and discovery guides on LinkHub." />
@@ -17,7 +17,7 @@
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://linkhub-directory.vercel.app/blog-post.html" />
+    <meta property="twitter:url" content="%LINKHUB_ORIGIN%/blog-post.html" />
     <meta property="twitter:title" content="Blog Post | LinkHub" />
     <meta property="twitter:description" content="Read community safety and discovery guides on LinkHub." />
     <meta property="twitter:image" content="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=80" />
@@ -68,12 +68,15 @@
           </button>
         </div>
       </div>
+    </nav>
 
+    <!-- Mobile Navigation (outside sticky backdrop-blur nav so fixed drawer isn't clipped) -->
+    <div class="fixed inset-0 z-[60] overflow-hidden pointer-events-none md:hidden">
       <!-- Mobile Backdrop Overlay -->
-      <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"></div>
+      <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
       <!-- Mobile Navigation Drawer -->
-      <div id="mobile-menu-drawer" class="fixed top-0 right-0 bottom-0 w-72 sm:w-80 max-w-[85vw] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col justify-between p-5 sm:p-6 pb-safe">
+      <div id="mobile-menu-drawer" class="fixed top-0 right-0 bottom-0 w-72 sm:w-80 max-w-[85vw] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 sm:p-6 pb-safe pointer-events-auto">
         <div>
           <!-- Drawer Header -->
           <div class="flex items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800">
@@ -120,7 +123,7 @@
           </a>
         </div>
       </div>
-    </nav>
+    </div>
 
     <!-- Article Content -->
     <article class="pt-8 pb-20 sm:pt-16 sm:pb-28 lg:pt-24 lg:pb-36">

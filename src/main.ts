@@ -3,6 +3,7 @@ import { initTheme } from './theme';
 import { initTelegramPromo } from './telegram-promo';
 import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
+import { BlogPostPreview, renderHomeFeaturedBlogCardHtml } from './blog-renderer';
 
 inject();
 initTelegramPromo();
@@ -165,6 +166,22 @@ async function init() {
   // Fetch and initial render
   initTheme();
   initMobileMenu();
+  const homeBlogContainer = document.getElementById('home-blog-container');
+  if (homeBlogContainer) {
+    fetch('/blogs/index.json')
+      .then(res => (res.ok ? (res.json() as Promise<BlogPostPreview[]>) : Promise.resolve([])))
+      .then(blogs => {
+        if (blogs.length > 0) {
+          homeBlogContainer.innerHTML = blogs
+            .slice(0, 3)
+            .map(renderHomeFeaturedBlogCardHtml)
+            .join('\n');
+        }
+      })
+      .catch(() => {
+        // Keep build-time prerendered cards if offline
+      });
+  }
   allPosts = await fetchPosts();
   renderTrending();
   renderPosts();
