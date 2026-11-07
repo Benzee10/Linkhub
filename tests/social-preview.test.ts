@@ -11,6 +11,7 @@ import {
   prerenderBlogPostHtml,
 } from '../scripts/blog-build';
 import { detectImageMetadata } from '../scripts/social-image-fetch';
+import { SOCIAL_PREVIEW_PLACEHOLDER } from '../src/social-preview';
 
 const rootDir = process.cwd();
 
@@ -140,23 +141,46 @@ test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without 
   const nigerianGirls = JSON.parse(
     fs.readFileSync(path.join(rootDir, 'public/posts/nigerian-girls.json'), 'utf-8'),
   );
+  const kenyanGirls = JSON.parse(
+    fs.readFileSync(path.join(rootDir, 'public/posts/kenyan-girls.json'), 'utf-8'),
+  );
   const postsIndex = JSON.parse(
     fs.readFileSync(path.join(rootDir, 'public/posts/index.json'), 'utf-8'),
   ) as Array<{ id: string; image: string }>;
-  const indexEntry = postsIndex.find(item => item.id === 'nigerian-girls');
+  const ngIndexEntry = postsIndex.find(item => item.id === 'nigerian-girls');
+  const keIndexEntry = postsIndex.find(item => item.id === 'kenyan-girls');
+
+  // Every directory post in public/posts/*.json has a socialPreviewImage link or manual placeholder
+  const postsDir = path.join(rootDir, 'public/posts');
+  const postFiles = fs.readdirSync(postsDir).filter(f => f.endsWith('.json') && f !== 'index.json');
+  assert.equal(postFiles.length, 53);
+  for (const file of postFiles) {
+    const postJson = JSON.parse(fs.readFileSync(path.join(postsDir, file), 'utf-8'));
+    assert.equal(typeof postJson.socialPreviewImage, 'string', `Missing socialPreviewImage in ${file}`);
+    if (postJson.id !== 'nigerian-girls' && postJson.id !== 'kenyan-girls') {
+      assert.equal(postJson.socialPreviewImage, SOCIAL_PREVIEW_PLACEHOLDER);
+    }
+  }
 
   // In-post #post-image and homepage card image must NOT show the social preview image
   assert.equal(
     nigerianGirls.image,
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10',
   );
-  assert.equal(indexEntry?.image, nigerianGirls.image);
-  assert.equal(nigerianGirls.socialPreviewImage, '/preview/nigerian-girls.jpg');
-  assert.equal(nigerianGirls.socialPreviewImageSource, 'https://i.postimg.cc/L4ZN5KX2/20261107-110742.jpg');
+  assert.equal(ngIndexEntry?.image, nigerianGirls.image);
+  assert.equal(nigerianGirls.socialPreviewImage, 'https://i.postimg.cc/L4ZN5KX2/20261107-110742.jpg');
+
+  assert.equal(
+    kenyanGirls.image,
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10',
+  );
+  assert.equal(keIndexEntry?.image, kenyanGirls.image);
+  assert.equal(kenyanGirls.socialPreviewImage, 'https://i.postimg.cc/nz6zLQLN/20261107-112916.jpg');
 
   const postTemplate = fs.readFileSync(path.join(rootDir, 'post.html'), 'utf-8');
   const nigerianJson = fs.readFileSync(path.join(rootDir, 'public/posts/nigerian-girls.json'), 'utf-8');
   const kenyanJson = fs.readFileSync(path.join(rootDir, 'public/posts/kenyan-girls.json'), 'utf-8');
+  const ghanaJson = fs.readFileSync(path.join(rootDir, 'public/posts/ghana-girls.json'), 'utf-8');
 
   const assets = {
     async fetch(input: Request | URL | string) {
@@ -169,6 +193,9 @@ test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without 
       }
       if (reqUrl.pathname === '/posts/kenyan-girls.json') {
         return new Response(kenyanJson, { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      if (reqUrl.pathname === '/posts/ghana-girls.json') {
+        return new Response(ghanaJson, { status: 200, headers: { 'content-type': 'application/json' } });
       }
       return new Response('Not found', { status: 404 });
     },
@@ -200,14 +227,39 @@ test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without 
   assert.equal(bodyHtml.includes('nigerian-girls.jpg'), false);
   assert.equal(bodyHtml.includes('20261107-110742.jpg'), false);
 
-  // Other directory posts remain unaffected
+  // Kenyan Girls uses its own dedicated preview image and never shows Nigerian Girls preview
   const keRes = await onRequest({
-    request: new Request('https://blog.novaqueens.name.ng/post?id=kenyan-girls'),
+    request: new Request('https://blog.novaqueens.name.ng/post.html?id=kenyan-girls'),
+    next: async () => new Response(null, { status: 308, headers: { location: '/post?id=kenyan-girls' } }),
+    env: { ASSETS: assets },
+  });
+  assert.equal(keRes.status, 200);
+  const keHtml = await keRes.text();
+  assert.equal(keHtml.includes('/preview/nigerian-girls.jpg'), false);
+  assert.match(keHtml, /<title>Kenyan Girls WhatsApp Group Links \| LinkHub<\/title>/);
+  assert.match(
+    keHtml,
+    /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/kenyan-girls\.jpg" \/>/,
+  );
+  assert.match(
+    keHtml,
+    /<meta name="twitter:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/kenyan-girls\.jpg" \/>/,
+  );
+  const keBodyHtml = keHtml.split('</head>')[1] || '';
+  assert.equal(keBodyHtml.includes('kenyan-girls.jpg'), false);
+  assert.equal(keBodyHtml.includes('20261107-112916.jpg'), false);
+
+  // Other directory posts with unfilled placeholder fall back cleanly to post.image
+  const ghRes = await onRequest({
+    request: new Request('https://blog.novaqueens.name.ng/post?id=ghana-girls'),
     next: async () => new Response(postTemplate, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }),
     env: { ASSETS: assets },
   });
-  const keHtml = await keRes.text();
-  assert.equal(keHtml.includes('/preview/nigerian-girls.jpg'), false);
+  const ghHtml = await ghRes.text();
+  assert.equal(ghHtml.includes('/preview/nigerian-girls.jpg'), false);
+  assert.equal(ghHtml.includes('/preview/kenyan-girls.jpg'), false);
+  assert.equal(ghHtml.includes(SOCIAL_PREVIEW_PLACEHOLDER), false);
+  assert.match(ghHtml, /<meta property="og:image" content="https:\/\/encrypted-tbn0\.gstatic\.com\/[^"]+" \/>/);
 
   // Verify detectImageMetadata accurately parses JPEG dimensions
   const sampleJpeg = new Uint8Array(

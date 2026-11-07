@@ -3,6 +3,7 @@ import { initTheme } from './theme';
 import { initTelegramPromo } from './telegram-promo';
 import { initMobileMenu } from './navigation';
 import { CONFIG } from './config';
+import { resolveDirectoryPostPreviewImage } from './social-preview';
 import { inject } from '@vercel/analytics';
 
 inject();
@@ -62,7 +63,7 @@ function updateMetaTags(post: PostDetail) {
   const ogDescription = document.querySelector('meta[property="og:description"]');
   if (ogDescription) ogDescription.setAttribute('content', post.description);
 
-  const rawPreviewImage = post.socialPreviewImage || post.image;
+  const rawPreviewImage = resolveDirectoryPostPreviewImage(post);
   const absoluteImage = rawPreviewImage.startsWith('http') 
     ? rawPreviewImage 
     : `${window.location.origin}${rawPreviewImage.startsWith('/') ? rawPreviewImage : '/' + rawPreviewImage}`;

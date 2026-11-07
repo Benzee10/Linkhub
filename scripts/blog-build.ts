@@ -9,6 +9,7 @@ import {
   renderBlogTagsHtml,
   toBlogPostPreview,
 } from '../src/blog-renderer';
+import { resolveBlogPostPreviewImage } from '../src/social-preview';
 
 export const BLOGS_DIR_NAME = 'blogs';
 
@@ -88,7 +89,7 @@ export function prerenderBlogPostHtml(
 ): string {
   const cleanOrigin = origin.replace(/\/+$/, '');
   const pageUrl = resolveOriginUrl(getBlogPostPath(post), cleanOrigin);
-  const rawPreviewImage = post.socialPreviewImage || post.coverImage;
+  const rawPreviewImage = resolveBlogPostPreviewImage(post);
   const previewImageUrl = resolveOriginUrl(rawPreviewImage, cleanOrigin);
   const imageWidth = post.socialPreviewImageWidth || 1200;
   const imageHeight = post.socialPreviewImageHeight || 630;

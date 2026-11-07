@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { injectSocialMetaIntoHtml } from '../functions/_middleware';
+import {
+  getRemoteSocialPreviewSource,
+  resolveDirectoryPostPreviewImage,
+} from '../src/social-preview';
 
 export interface ImageDimensions {
   width: number;
@@ -101,6 +105,8 @@ export async function fetchVerifiedImageBytes(
     candidates.push(fallbackUrl);
   }
 
+  let referer = 'https://postimg.cc/';
+
   for (let i = 0; i < candidates.length; i++) {
     const candidate = candidates[i];
     const controller = new AbortController();
@@ -109,7 +115,7 @@ export async function fetchVerifiedImageBytes(
       const response = await fetch(candidate, {
         headers: {
           Accept: 'image/jpeg,image/png,image/webp,image/*;q=0.9,*/*;q=0.1',
-          Referer: 'https://postimg.cc/',
+          Referer: referer,
           'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
         },
@@ -118,6 +124,9 @@ export async function fetchVerifiedImageBytes(
       });
 
       if (!response.ok) continue;
+      if (response.url) {
+        referer = response.url;
+      }
 
       const buffer = new Uint8Array(await response.arrayBuffer());
       const meta = detectImageMetadata(buffer);
@@ -129,9 +138,12 @@ export async function fetchVerifiedImageBytes(
       const contentType = response.headers.get('content-type') || '';
       if (contentType.includes('text/html')) {
         const html = new TextDecoder().decode(buffer);
-        const dlMatch = html.match(/https:\/\/i\.postimg\.cc\/[^"'\s>]+\?dl=1/i);
-        if (dlMatch && !candidates.includes(dlMatch[0])) {
-          candidates.push(dlMatch[0]);
+        const dlMatches = html.match(/https:\/\/i\.postimg\.cc\/[^"'\s<>]+\?dl=1/gi) || [];
+        for (const matchUrl of dlMatches) {
+          const cleanUrl = matchUrl.replaceAll('&amp;', '&');
+          if (!candidates.includes(cleanUrl)) {
+            candidates.push(cleanUrl);
+          }
         }
       }
     } catch {
@@ -171,22 +183,17 @@ export async function buildDirectoryPostSocialPreviews(
   for (const file of files) {
     const srcJsonPath = path.join(postsDir, file);
     const data = JSON.parse(fs.readFileSync(srcJsonPath, 'utf-8')) as DirectoryPostRecord;
-    if (!data.socialPreviewImage && !data.socialPreviewImageSource) {
-      continue;
-    }
 
     let width = data.socialPreviewImageWidth || 1200;
     let height = data.socialPreviewImageHeight || 630;
+    const remoteSource = getRemoteSocialPreviewSource(data);
+    const resolvedPreview = resolveDirectoryPostPreviewImage(data);
 
-    // If a remote preview source URL is configured and the local preview path is relative, download it into dist/
-    if (
-      data.socialPreviewImageSource &&
-      data.socialPreviewImage &&
-      data.socialPreviewImage.startsWith('/')
-    ) {
-      const targetAssetPath = path.join(distDir, data.socialPreviewImage.replace(/^\/+/, ''));
+    // If a remote preview URL is configured (e.g. "https://i.postimg.cc/..."), download it into dist/preview/<id>.jpg
+    if (remoteSource && resolvedPreview.startsWith('/')) {
+      const targetAssetPath = path.join(distDir, resolvedPreview.replace(/^\/+/, ''));
       const fetched = await fetchVerifiedImageBytes(
-        data.socialPreviewImageSource,
+        remoteSource,
         data.socialPreviewImageFallback,
       );
 
@@ -200,6 +207,8 @@ export async function buildDirectoryPostSocialPreviews(
         if (fs.existsSync(distPostJsonPath)) {
           const updatedData: DirectoryPostRecord = {
             ...data,
+            socialPreviewImage: resolvedPreview,
+            socialPreviewImageSource: remoteSource,
             socialPreviewImageWidth: width,
             socialPreviewImageHeight: height,
           };
@@ -208,10 +217,9 @@ export async function buildDirectoryPostSocialPreviews(
       }
     }
 
-    const rawPreview = data.socialPreviewImage || data.socialPreviewImageSource || data.image;
-    const absolutePreviewUrl = rawPreview.startsWith('http')
-      ? rawPreview
-      : `${productionOrigin}${rawPreview.startsWith('/') ? rawPreview : `/${rawPreview}`}`;
+    const absolutePreviewUrl = resolvedPreview.startsWith('http')
+      ? resolvedPreview
+      : `${productionOrigin}${resolvedPreview.startsWith('/') ? resolvedPreview : `/${resolvedPreview}`}`;
     const pageUrl = `${productionOrigin}/post.html?id=${encodeURIComponent(data.id)}`;
 
     const prerenderedPostHtml = injectSocialMetaIntoHtml(postTemplateHtml, {

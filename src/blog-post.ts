@@ -4,6 +4,7 @@ import { initTelegramPromo } from './telegram-promo';
 import { initMobileMenu } from './navigation';
 import { inject } from '@vercel/analytics';
 import { CONFIG } from './config';
+import { resolveBlogPostPreviewImage } from './social-preview';
 import {
   BlogPost,
   getBlogPostPath,
@@ -61,7 +62,7 @@ function updateMeta(post: BlogPost) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.setAttribute('content', description);
 
-  const rawImage = post.socialPreviewImage || post.coverImage;
+  const rawImage = resolveBlogPostPreviewImage(post);
   const absoluteImage = rawImage.startsWith('http')
     ? rawImage
     : `${window.location.origin}${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`;
