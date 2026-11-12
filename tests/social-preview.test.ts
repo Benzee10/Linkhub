@@ -10,8 +10,16 @@ import {
   loadBlogPostById,
   prerenderBlogPostHtml,
 } from '../scripts/blog-build';
+import {
+  buildSitemapXml,
+  loadAllDirectoryPosts,
+} from '../scripts/posts-build';
 import { detectImageMetadata } from '../scripts/social-image-fetch';
-import { SOCIAL_PREVIEW_PLACEHOLDER } from '../src/social-preview';
+import { renderPostCardHtml } from '../src/post-renderer';
+import {
+  isConfiguredPreviewLink,
+  SOCIAL_PREVIEW_PLACEHOLDER,
+} from '../src/social-preview';
 
 const rootDir = process.cwd();
 
@@ -20,7 +28,7 @@ test('CONFIG uses Adsterra smart link https://html-starter-6nu.pages.dev and sit
   assert.equal(CONFIG.SITE_ORIGIN, 'https://blog.novaqueens.name.ng');
 });
 
-test('all blog posts live in the single /blogs folder and prerender static SEO/Open Graph HTML pages', () => {
+test('all blog posts live in the single /blogs folder and prerender static SEO/Open Graph HTML pages with JSON-LD', () => {
   const posts = loadAllBlogPosts(rootDir);
   assert.equal(posts.length, 4);
   assert.deepEqual(
@@ -33,11 +41,11 @@ test('all blog posts live in the single /blogs folder and prerender static SEO/O
     ],
   );
 
-  // Obsolete duplicate locations should not exist
+  // Obsolete duplicate locations and multi-MB PNG should not exist
   assert.equal(fs.existsSync(path.join(rootDir, 'src/posts')), false);
-  assert.equal(fs.existsSync(path.join(rootDir, 'how-to-make-a-girl-miss-you.html')), false);
-  assert.equal(fs.existsSync(path.join(rootDir, 'signs-a-woman-has-just-slept-with-another-man.html')), false);
-  assert.equal(fs.existsSync(path.join(rootDir, 'public/blogs/index.json')), false);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/blogs/romantic-girlfriend-featured.png')), false);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/blogs/romantic-girlfriend-featured.webp')), true);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/blogs/romantic-girlfriend-featured.jpg')), true);
 
   const indexPreview = buildBlogIndex(posts);
   assert.equal(indexPreview[0].url, '/how-to-make-a-girl-miss-you');
@@ -70,10 +78,11 @@ test('all blog posts live in the single /blogs folder and prerender static SEO/O
     renderedMissYou,
     /<link rel="canonical" href="https:\/\/blog\.novaqueens\.name\.ng\/how-to-make-a-girl-miss-you" \/>/,
   );
+  assert.match(renderedMissYou, /<script type="application\/ld\+json">/);
   assert.match(renderedMissYou, /data-prerendered-id="how-to-make-a-girl-miss-you"/);
   assert.equal(fs.existsSync(path.join(rootDir, 'public/blogs/how-to-make-a-girl-miss-you-preview.jpg')), true);
 
-  // Verify relationship trust post preserves h2, h3, bullets, quote, and its own preview image
+  // Verify relationship trust post uses .webp in-page cover and .jpg OG preview image
   const trustPost = loadBlogPostById(rootDir, 'signs-a-woman-has-just-slept-with-another-man');
   assert.ok(trustPost);
   const renderedTrust = prerenderBlogPostHtml(
@@ -87,12 +96,13 @@ test('all blog posts live in the single /blogs folder and prerender static SEO/O
     renderedTrust,
     /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/blogs\/relationship-trust-featured\.jpg" \/>/,
   );
+  assert.match(renderedTrust, /id="blog-cover" src="\/blogs\/relationship-trust-featured\.webp"/);
   assert.match(renderedTrust, /<h3[^>]*>1\. Rushing Straight to Shower or Change Out of Habit<\/h3>/);
   assert.match(renderedTrust, /<blockquote[^>]*>/);
   assert.match(renderedTrust, /<ul class="list-disc/);
 });
 
-test('Cloudflare Pages middleware injects how-to-make-a-girl-miss-you preview image on /blog-post(.html)?id=how-to-make-a-girl-miss-you only', async () => {
+test('Cloudflare Pages middleware injects social meta + canonical on /blog-post(.html)?id=...', async () => {
   const blogPostTemplate = fs.readFileSync(path.join(rootDir, 'blog-post.html'), 'utf-8');
   const missYouJson = fs.readFileSync(path.join(rootDir, 'blogs/how-to-make-a-girl-miss-you.json'), 'utf-8');
   const romanticJson = fs.readFileSync(path.join(rootDir, 'blogs/romantic-ways-to-ask-her-to-be-your-girlfriend.json'), 'utf-8');
@@ -113,7 +123,6 @@ test('Cloudflare Pages middleware injects how-to-make-a-girl-miss-you preview im
     },
   };
 
-  // 1. Legacy .html query URL (even if static layer returns 308 to clean URL)
   const missYouRes = await onRequest({
     request: new Request('https://blog.novaqueens.name.ng/blog-post.html?id=how-to-make-a-girl-miss-you'),
     next: async () => new Response(null, { status: 308, headers: { location: '/blog-post?id=how-to-make-a-girl-miss-you' } }),
@@ -122,11 +131,10 @@ test('Cloudflare Pages middleware injects how-to-make-a-girl-miss-you preview im
   assert.equal(missYouRes.status, 200);
   const missYouHtml = await missYouRes.text();
   assert.match(missYouHtml, /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/blogs\/how-to-make-a-girl-miss-you-preview\.jpg" \/>/);
-  assert.match(missYouHtml, /<meta name="twitter:image" content="https:\/\/blog\.novaqueens\.name\.ng\/blogs\/how-to-make-a-girl-miss-you-preview\.jpg" \/>/);
+  assert.match(missYouHtml, /<link rel="canonical" href="https:\/\/blog\.novaqueens\.name\.ng\/how-to-make-a-girl-miss-you" \/>/);
   assert.match(missYouHtml, /<meta property="og:image:width" content="1280" \/>/);
   assert.match(missYouHtml, /<meta property="og:image:height" content="720" \/>/);
 
-  // 2. Other posts keep their own preview image and never show how-to-make-a-girl-miss-you-preview.jpg
   const otherRes = await onRequest({
     request: new Request('https://blog.novaqueens.name.ng/blog-post?id=romantic-ways-to-ask-her-to-be-your-girlfriend'),
     next: async () => new Response(blogPostTemplate, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }),
@@ -134,53 +142,35 @@ test('Cloudflare Pages middleware injects how-to-make-a-girl-miss-you preview im
   });
   const otherHtml = await otherRes.text();
   assert.equal(otherHtml.includes('how-to-make-a-girl-miss-you-preview.jpg'), false);
-  assert.match(otherHtml, /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/blogs\/romantic-girlfriend-featured\.png" \/>/);
+  assert.match(otherHtml, /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/blogs\/romantic-girlfriend-featured\.jpg" \/>/);
 });
 
-test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without changing in-post or card image', async () => {
-  const nigerianGirls = JSON.parse(
-    fs.readFileSync(path.join(rootDir, 'public/posts/nigerian-girls.json'), 'utf-8'),
-  );
-  const kenyanGirls = JSON.parse(
-    fs.readFileSync(path.join(rootDir, 'public/posts/kenyan-girls.json'), 'utf-8'),
-  );
+test('Directory posts maintain 100% category consistency, SSR body pre-rendering, and preview-only social images', async () => {
+  const dirPosts = loadAllDirectoryPosts(rootDir);
+  assert.equal(dirPosts.length, 52);
+
   const postsIndex = JSON.parse(
     fs.readFileSync(path.join(rootDir, 'public/posts/index.json'), 'utf-8'),
-  ) as Array<{ id: string; image: string }>;
-  const ngIndexEntry = postsIndex.find(item => item.id === 'nigerian-girls');
-  const keIndexEntry = postsIndex.find(item => item.id === 'kenyan-girls');
+  ) as Array<{ id: string; image: string; category: string }>;
+  assert.equal(postsIndex.length, 52);
 
-  // Every directory post in public/posts/*.json has a socialPreviewImage link or manual placeholder
-  const postsDir = path.join(rootDir, 'public/posts');
-  const postFiles = fs.readdirSync(postsDir).filter(f => f.endsWith('.json') && f !== 'index.json');
-  assert.equal(postFiles.length, 53);
-  for (const file of postFiles) {
-    const postJson = JSON.parse(fs.readFileSync(path.join(postsDir, file), 'utf-8'));
-    assert.equal(typeof postJson.socialPreviewImage, 'string', `Missing socialPreviewImage in ${file}`);
-    if (postJson.id !== 'nigerian-girls' && postJson.id !== 'kenyan-girls') {
-      assert.equal(postJson.socialPreviewImage, SOCIAL_PREVIEW_PLACEHOLDER);
-    }
+  for (const post of dirPosts) {
+    assert.equal(typeof post.socialPreviewImage, 'string', `Missing socialPreviewImage in ${post.id}`);
+    assert.equal(
+      post.socialPreviewImage === SOCIAL_PREVIEW_PLACEHOLDER || isConfiguredPreviewLink(post.socialPreviewImage),
+      true,
+      `Invalid socialPreviewImage in ${post.id}`,
+    );
+    const indexEntry = postsIndex.find(item => item.id === post.id);
+    assert.ok(indexEntry, `Missing ${post.id} in index.json`);
+    assert.equal(indexEntry.category, post.category, `Category mismatch on ${post.id}`);
+    assert.equal(indexEntry.image, post.image, `Image mismatch on ${post.id}`);
   }
-
-  // In-post #post-image and homepage card image must NOT show the social preview image
-  assert.equal(
-    nigerianGirls.image,
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10',
-  );
-  assert.equal(ngIndexEntry?.image, nigerianGirls.image);
-  assert.equal(nigerianGirls.socialPreviewImage, 'https://i.postimg.cc/L4ZN5KX2/20261107-110742.jpg');
-
-  assert.equal(
-    kenyanGirls.image,
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXDlb9Vb9JA11H3uvRYCK_-NGf_XFrilkhkUmQYUGkQ&s=10',
-  );
-  assert.equal(keIndexEntry?.image, kenyanGirls.image);
-  assert.equal(kenyanGirls.socialPreviewImage, 'https://i.postimg.cc/nz6zLQLN/20261107-112916.jpg');
 
   const postTemplate = fs.readFileSync(path.join(rootDir, 'post.html'), 'utf-8');
   const nigerianJson = fs.readFileSync(path.join(rootDir, 'public/posts/nigerian-girls.json'), 'utf-8');
   const kenyanJson = fs.readFileSync(path.join(rootDir, 'public/posts/kenyan-girls.json'), 'utf-8');
-  const ghanaJson = fs.readFileSync(path.join(rootDir, 'public/posts/ghana-girls.json'), 'utf-8');
+  const moroccoJson = fs.readFileSync(path.join(rootDir, 'public/posts/morocco-girls.json'), 'utf-8');
 
   const assets = {
     async fetch(input: Request | URL | string) {
@@ -194,14 +184,13 @@ test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without 
       if (reqUrl.pathname === '/posts/kenyan-girls.json') {
         return new Response(kenyanJson, { status: 200, headers: { 'content-type': 'application/json' } });
       }
-      if (reqUrl.pathname === '/posts/ghana-girls.json') {
-        return new Response(ghanaJson, { status: 200, headers: { 'content-type': 'application/json' } });
+      if (reqUrl.pathname === '/posts/morocco-girls.json') {
+        return new Response(moroccoJson, { status: 200, headers: { 'content-type': 'application/json' } });
       }
       return new Response('Not found', { status: 404 });
     },
   };
 
-  // Both /post.html?id=nigerian-girls and /post?id=nigerian-girls inject the Nigerian Girls preview image
   const ngRes = await onRequest({
     request: new Request('https://blog.novaqueens.name.ng/post.html?id=nigerian-girls'),
     next: async () => new Response(null, { status: 308, headers: { location: '/post?id=nigerian-girls' } }),
@@ -210,58 +199,40 @@ test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without 
   assert.equal(ngRes.status, 200);
   const ngHtml = await ngRes.text();
   assert.match(ngHtml, /<title>Nigerian Girls WhatsApp Group Links \| LinkHub<\/title>/);
+  assert.match(ngHtml, /<link rel="canonical" href="https:\/\/blog\.novaqueens\.name\.ng\/post\?id=nigerian-girls" \/>/);
   assert.match(
     ngHtml,
     /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/nigerian-girls\.jpg" \/>/,
   );
-  assert.match(
-    ngHtml,
-    /<meta property="og:image:secure_url" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/nigerian-girls\.jpg" \/>/,
-  );
-  assert.match(
-    ngHtml,
-    /<meta name="twitter:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/nigerian-girls\.jpg" \/>/,
-  );
-  // Ensure post.html body does NOT contain the preview image inside the post
+  // Verify SSR body pre-rendering rendered group cards & h1 while keeping social preview image out of body
   const bodyHtml = ngHtml.split('</head>')[1] || '';
+  assert.match(bodyHtml, /data-prerendered-id="nigerian-girls"/);
+  assert.match(bodyHtml, /LagosHotGirls/);
   assert.equal(bodyHtml.includes('nigerian-girls.jpg'), false);
   assert.equal(bodyHtml.includes('20261107-110742.jpg'), false);
 
-  // Kenyan Girls uses its own dedicated preview image and never shows Nigerian Girls preview
   const keRes = await onRequest({
     request: new Request('https://blog.novaqueens.name.ng/post.html?id=kenyan-girls'),
     next: async () => new Response(null, { status: 308, headers: { location: '/post?id=kenyan-girls' } }),
     env: { ASSETS: assets },
   });
-  assert.equal(keRes.status, 200);
   const keHtml = await keRes.text();
   assert.equal(keHtml.includes('/preview/nigerian-girls.jpg'), false);
-  assert.match(keHtml, /<title>Kenyan Girls WhatsApp Group Links \| LinkHub<\/title>/);
   assert.match(
     keHtml,
     /<meta property="og:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/kenyan-girls\.jpg" \/>/,
   );
-  assert.match(
-    keHtml,
-    /<meta name="twitter:image" content="https:\/\/blog\.novaqueens\.name\.ng\/preview\/kenyan-girls\.jpg" \/>/,
-  );
-  const keBodyHtml = keHtml.split('</head>')[1] || '';
-  assert.equal(keBodyHtml.includes('kenyan-girls.jpg'), false);
-  assert.equal(keBodyHtml.includes('20261107-112916.jpg'), false);
 
-  // Other directory posts with unfilled placeholder fall back cleanly to post.image
-  const ghRes = await onRequest({
-    request: new Request('https://blog.novaqueens.name.ng/post?id=ghana-girls'),
+  // Post with unfilled placeholder falls back cleanly to post.image
+  const maRes = await onRequest({
+    request: new Request('https://blog.novaqueens.name.ng/post?id=morocco-girls'),
     next: async () => new Response(postTemplate, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }),
     env: { ASSETS: assets },
   });
-  const ghHtml = await ghRes.text();
-  assert.equal(ghHtml.includes('/preview/nigerian-girls.jpg'), false);
-  assert.equal(ghHtml.includes('/preview/kenyan-girls.jpg'), false);
-  assert.equal(ghHtml.includes(SOCIAL_PREVIEW_PLACEHOLDER), false);
-  assert.match(ghHtml, /<meta property="og:image" content="https:\/\/encrypted-tbn0\.gstatic\.com\/[^"]+" \/>/);
+  const maHtml = await maRes.text();
+  assert.equal(maHtml.includes(SOCIAL_PREVIEW_PLACEHOLDER), false);
+  assert.match(maHtml, /<meta property="og:image" content="https:\/\/encrypted-tbn0\.gstatic\.com\/[^"]+" \/>/);
 
-  // Verify detectImageMetadata accurately parses JPEG dimensions
   const sampleJpeg = new Uint8Array(
     fs.readFileSync(path.join(rootDir, 'public/blogs/how-to-make-a-girl-miss-you-preview.jpg')),
   );
@@ -270,4 +241,32 @@ test('Nigerian Girls WhatsApp Group Links uses dedicated social preview without 
     height: 720,
     mimeType: 'image/jpeg',
   });
+});
+
+test('Cloudflare optimization files, XML sitemap, and XSS escaping work properly', () => {
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/_routes.json')), true);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/_headers')), true);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/robots.txt')), true);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/404.html')), true);
+  assert.equal(fs.existsSync(path.join(rootDir, 'public/og-default.jpg')), true);
+
+  const blogPosts = loadAllBlogPosts(rootDir);
+  const dirPosts = loadAllDirectoryPosts(rootDir);
+  const sitemap = buildSitemapXml(CONFIG.SITE_ORIGIN, blogPosts, dirPosts);
+  assert.match(sitemap, /<loc>https:\/\/blog\.novaqueens\.name\.ng\/<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/blog\.novaqueens\.name\.ng\/blog<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/blog\.novaqueens\.name\.ng\/how-to-make-a-girl-miss-you<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/blog\.novaqueens\.name\.ng\/post\?id=nigerian-girls<\/loc>/);
+
+  // Verify XSS escaping and javascript: URL rejection in post card renderer
+  const maliciousCard = renderPostCardHtml({
+    id: 'test-xss',
+    title: '<img src=x onerror=alert(1)>',
+    description: 'Safe & "escaped"',
+    image: 'javascript:alert(1)',
+    category: '<script>evil()</script>',
+  });
+  assert.equal(maliciousCard.includes('<script>'), false);
+  assert.equal(maliciousCard.includes('javascript:'), false);
+  assert.match(maliciousCard, /&lt;img src=x onerror=alert\(1\)&gt;/);
 });

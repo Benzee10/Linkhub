@@ -1,91 +1,114 @@
 /**
- * Mobile Navigation Drawer & Hamburger Menu Controller
- * Handles opening, closing, accessibility, body scroll locking,
- * and theme toggling within mobile menu drawers.
+ * Mobile Navigation Drawer & Responsive Controls
+ * Accessible slide-over mobile menu with Escape handling, inert management, and scroll locking.
  */
+let mobileMenuInitialized = false;
+
 export function initMobileMenu() {
-  const toggleBtn = document.getElementById('mobile-menu-btn');
-  const drawer = document.getElementById('mobile-menu-drawer');
-  const overlay = document.getElementById('mobile-menu-overlay');
-  const closeBtn = document.getElementById('mobile-menu-close');
-  const menuIcon = document.getElementById('hamburger-icon');
+  if (mobileMenuInitialized) return;
+
+  const menuBtn = document.getElementById('mobile-menu-btn') as HTMLElement | null;
+  const closeBtn = document.getElementById('mobile-menu-close') as HTMLElement | null;
+  const overlay = document.getElementById('mobile-menu-overlay') as HTMLElement | null;
+  const drawer = document.getElementById('mobile-menu-drawer') as (HTMLElement & { inert?: boolean }) | null;
+  const hamburgerIcon = document.getElementById('hamburger-icon');
   const closeIcon = document.getElementById('close-icon');
-  const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
 
-  if (!toggleBtn || !drawer) return;
+  if (!menuBtn || !drawer || !overlay) return;
+  mobileMenuInitialized = true;
 
-  // Keep off-screen links out of the keyboard focus order while the menu is closed.
-  drawer.setAttribute('inert', '');
+  drawer.inert = true;
+  drawer.setAttribute('aria-hidden', 'true');
+
   let isOpen = false;
 
   const openMenu = () => {
     isOpen = true;
-    drawer.removeAttribute('inert');
+    menuBtn.setAttribute('aria-expanded', 'true');
+    drawer.inert = false;
+    drawer.setAttribute('aria-hidden', 'false');
+    overlay.classList.remove('opacity-0', 'pointer-events-none');
+    overlay.classList.add('opacity-100', 'pointer-events-auto');
     drawer.classList.remove('translate-x-full');
     drawer.classList.add('translate-x-0');
-    if (overlay) {
-      overlay.classList.remove('opacity-0', 'pointer-events-none');
-      overlay.classList.add('opacity-100', 'pointer-events-auto');
-    }
-    if (menuIcon && closeIcon) {
-      menuIcon.classList.add('hidden');
-      closeIcon.classList.remove('hidden');
-    }
-    toggleBtn.setAttribute('aria-expanded', 'true');
-    document.body.classList.add('overflow-hidden');
+    hamburgerIcon?.classList.add('hidden');
+    hamburgerIcon?.classList.remove('block');
+    closeIcon?.classList.remove('hidden');
+    closeIcon?.classList.add('block');
+    document.body.style.overflow = 'hidden';
+    closeBtn?.focus({ preventScroll: true });
   };
 
-  const closeMenu = () => {
+  const closeMenu = (restoreFocus = false) => {
+    if (!isOpen) return;
     isOpen = false;
-    drawer.setAttribute('inert', '');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    drawer.inert = true;
+    drawer.setAttribute('aria-hidden', 'true');
+    overlay.classList.remove('opacity-100', 'pointer-events-auto');
+    overlay.classList.add('opacity-0', 'pointer-events-none');
     drawer.classList.remove('translate-x-0');
     drawer.classList.add('translate-x-full');
-    if (overlay) {
-      overlay.classList.remove('opacity-100', 'pointer-events-auto');
-      overlay.classList.add('opacity-0', 'pointer-events-none');
+    hamburgerIcon?.classList.remove('hidden');
+    hamburgerIcon?.classList.add('block');
+    closeIcon?.classList.add('hidden');
+    closeIcon?.classList.remove('block');
+    document.body.style.overflow = '';
+    if (restoreFocus) {
+      menuBtn.focus({ preventScroll: true });
     }
-    if (menuIcon && closeIcon) {
-      menuIcon.classList.remove('hidden');
-      closeIcon.classList.add('hidden');
-    }
-    toggleBtn.setAttribute('aria-expanded', 'false');
-    document.body.classList.remove('overflow-hidden');
   };
 
-  toggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
+  menuBtn.addEventListener('click', () => {
     if (isOpen) {
-      closeMenu();
+      closeMenu(true);
     } else {
       openMenu();
     }
   });
 
-  closeBtn?.addEventListener('click', closeMenu);
-  overlay?.addEventListener('click', closeMenu);
+  closeBtn?.addEventListener('click', () => closeMenu(true));
+  overlay.addEventListener('click', () => closeMenu(true));
 
-  // Close when pressing Escape key
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && isOpen) {
-      closeMenu();
+      closeMenu(true);
     }
   });
 
-  // Close when clicking mobile nav links
-  const mobileLinks = drawer.querySelectorAll('a');
-  mobileLinks.forEach((link) => {
-    link.addEventListener('click', () => {
-      closeMenu();
-    });
+  drawer.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => closeMenu(false));
   });
 
-  // Mobile Theme Toggle synchronization
-  if (mobileThemeToggle) {
-    mobileThemeToggle.addEventListener('click', () => {
-      const html = document.documentElement;
-      html.classList.toggle('dark');
-      const isDark = html.classList.contains('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-  }
+  const mobileThemeBtn = document.getElementById('mobile-theme-toggle');
+  mobileThemeBtn?.addEventListener('click', () => {
+    const desktopToggle = document.getElementById('theme-toggle');
+    if (desktopToggle) {
+      desktopToggle.click();
+    } else {
+      const isDark = document.documentElement.classList.toggle('dark');
+      try {
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  });
+
+  const mobileShareBtn = document.getElementById('mobile-share-btn');
+  mobileShareBtn?.addEventListener('click', () => {
+    closeMenu(false);
+    const desktopShare = document.getElementById('share-btn') || document.getElementById('share-blog-btn');
+    desktopShare?.click();
+  });
+
+  window.addEventListener(
+    'resize',
+    () => {
+      if (window.innerWidth >= 768 && isOpen) {
+        closeMenu(false);
+      }
+    },
+    { passive: true },
+  );
 }

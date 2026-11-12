@@ -1,20 +1,22 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# LinkHub — WhatsApp Communities Directory & Guides
 
-# Run and deploy your AI Studio app
+Production site: **https://blog.novaqueens.name.ng**
 
-This contains everything you need to run your app locally.
+## Tech Stack
+- **Frontend:** Vanilla TypeScript Multi-Page App (MPA) + Tailwind CSS v4
+- **Build & Static Pre-Rendering:** Vite (`vite.config.ts`, `scripts/blog-build.ts`, `scripts/posts-build.ts`, `scripts/social-image-fetch.ts`)
+- **Edge Hosting:** Cloudflare Pages + Pages Functions (`functions/_middleware.ts`, `public/_routes.json`, `public/_headers`)
 
-View your app in AI Studio: https://ai.studio/apps/164a1c3b-0543-42d7-abf2-996d3ad4e7c9
+## Content Authoring
+- **WhatsApp Community Directory Posts:** `public/posts/<slug>.json` — see [`docs/POSTS_AUTHORING.md`](docs/POSTS_AUTHORING.md)
+- **Blog Articles:** `blogs/<slug>.json` — see [`blogs/README.md`](blogs/README.md)
 
-## Run Locally
+## Local Development
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm install
+npm run dev      # Local Express + Vite server at http://localhost:3000
+npm test         # Unit & build-output tests
+npm run lint     # TypeScript strict typecheck
+npm run build    # Production build to dist/
+```

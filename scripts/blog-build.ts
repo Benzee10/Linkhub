@@ -81,6 +81,57 @@ function upsertHeadTag(html: string, pattern: RegExp, replacement: string): stri
   return html.replace('</head>', `    ${replacement}\n  </head>`);
 }
 
+function resolveMimeType(imageUrl: string): string {
+  const lower = imageUrl.toLowerCase();
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  return 'image/jpeg';
+}
+
+function buildBlogPostJsonLd(
+  post: BlogPost,
+  cleanOrigin: string,
+  pageUrl: string,
+  previewImageUrl: string,
+): string {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: post.description || post.excerpt,
+        image: [previewImageUrl],
+        datePublished: post.publishedTime || undefined,
+        author: {
+          '@type': 'Organization',
+          name: post.author || 'LinkHub Editorial Team',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'LinkHub',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${cleanOrigin}/og-default.jpg`,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': pageUrl,
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${cleanOrigin}/` },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${cleanOrigin}/blog` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: pageUrl },
+        ],
+      },
+    ],
+  }).replaceAll('<', '\\u003c');
+}
+
 export function prerenderBlogPostHtml(
   templateHtml: string,
   post: BlogPost,
@@ -93,7 +144,7 @@ export function prerenderBlogPostHtml(
   const previewImageUrl = resolveOriginUrl(rawPreviewImage, cleanOrigin);
   const imageWidth = post.socialPreviewImageWidth || 1200;
   const imageHeight = post.socialPreviewImageHeight || 630;
-  const mimeType = previewImageUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+  const mimeType = resolveMimeType(previewImageUrl);
   const description = post.description || post.excerpt;
   const titleAttr = escapeHtml(post.title);
   const descAttr = escapeHtml(description);
@@ -101,6 +152,7 @@ export function prerenderBlogPostHtml(
   const imgAttr = escapeHtml(previewImageUrl);
   const coverAltAttr = escapeHtml(post.coverImageAlt || post.title);
   const authorDisplay = post.authorRole ? `${post.author} (${post.authorRole})` : post.author;
+  const jsonLd = buildBlogPostJsonLd(post, cleanOrigin, pageUrl, previewImageUrl);
 
   let html = templateHtml.replaceAll('%LINKHUB_ORIGIN%', cleanOrigin);
 
@@ -137,6 +189,12 @@ export function prerenderBlogPostHtml(
     );
   }
 
+  html = upsertHeadTag(
+    html,
+    /<script\s+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/i,
+    `<script type="application/ld+json">${jsonLd}</script>`,
+  );
+
   // Pre-render article header, cover, body, and tags so crawlers and readers get instant HTML
   html = html.replace(
     /<article\b([^>]*)>/i,
@@ -168,7 +226,7 @@ export function prerenderBlogPostHtml(
   );
   html = html.replace(
     /<img id="blog-cover"[^>]*>/i,
-    `<img id="blog-cover" src="${escapeHtml(post.coverImage)}" alt="${coverAltAttr}" class="w-full h-full object-cover" />`,
+    `<img id="blog-cover" src="${escapeHtml(post.coverImage)}" alt="${coverAltAttr}" width="1200" height="675" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />`,
   );
   html = html.replace(
     /(<div id="blog-body"[^>]*>)[\s\S]*?(<\/div>\s*\n\s*<!-- Tags -->)/i,

@@ -1,21 +1,36 @@
-import express from "express";
-import { createServer as createViteServer } from "vite";
-import path from "path";
-import fs from "fs";
-import { CONFIG } from "./src/config";
+import express from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createServer as createViteServer } from 'vite';
 import {
-  getRemoteSocialPreviewSource,
-  resolveDirectoryPostPreviewImage,
-} from "./src/social-preview";
+  injectSocialMetaIntoHtml,
+  prerenderDirectoryPostBodyIntoHtml,
+} from './functions/_middleware';
 import {
   buildBlogIndex,
   loadAllBlogPosts,
   loadBlogPostById,
   prerenderBlogPostHtml,
-} from "./scripts/blog-build";
-import { fetchVerifiedImageBytes } from "./scripts/social-image-fetch";
+} from './scripts/blog-build';
+import {
+  buildDirectoryPostsIndex,
+  loadAllDirectoryPosts,
+} from './scripts/posts-build';
+import { fetchVerifiedImageBytes } from './scripts/social-image-fetch';
+import { CONFIG } from './src/config';
+import { DirectoryPostDetail } from './src/post-renderer';
+import {
+  getRemoteSocialPreviewSource,
+  resolveDirectoryPostPreviewImage,
+} from './src/social-preview';
 
-const DEFAULT_HOST = new URL(CONFIG.SITE_ORIGIN).host;
+const DEFAULT_ORIGIN = new URL(CONFIG.SITE_ORIGIN);
+
+function sanitizeHostHeader(rawHost: string | undefined): string {
+  if (!rawHost) return DEFAULT_ORIGIN.host;
+  const firstHost = rawHost.split(',')[0].trim();
+  return /^[a-z0-9.:-]+$/i.test(firstHost) ? firstHost : DEFAULT_ORIGIN.host;
+}
 
 async function startServer() {
   const app = express();
@@ -23,190 +38,152 @@ async function startServer() {
   const rootDir = process.cwd();
 
   const getOrigin = (req: express.Request): string => {
-    const host = req.get("x-forwarded-host") || req.get("host") || DEFAULT_HOST;
-    const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+    const host = sanitizeHostHeader(req.get('x-forwarded-host') || req.get('host'));
+    const rawProto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim();
+    const proto = rawProto === 'http' ? 'http' : 'https';
     return `${proto}://${host}`;
   };
 
   const getAbsoluteUrl = (req: express.Request, relativeOrAbsoluteUrl: string): string => {
     const origin = getOrigin(req);
-    if (!relativeOrAbsoluteUrl) {
-      return origin;
-    }
-    if (relativeOrAbsoluteUrl.startsWith("http://") || relativeOrAbsoluteUrl.startsWith("https://")) {
+    if (!relativeOrAbsoluteUrl) return origin;
+    if (relativeOrAbsoluteUrl.startsWith('http://') || relativeOrAbsoluteUrl.startsWith('https://')) {
       return relativeOrAbsoluteUrl;
     }
-    const cleanPath = relativeOrAbsoluteUrl.startsWith("/") ? relativeOrAbsoluteUrl : `/${relativeOrAbsoluteUrl}`;
+    const cleanPath = relativeOrAbsoluteUrl.startsWith('/')
+      ? relativeOrAbsoluteUrl
+      : `/${relativeOrAbsoluteUrl}`;
     return `${origin}${cleanPath}`;
   };
 
-  const getPageUrl = (req: express.Request): string => `${getOrigin(req)}${req.originalUrl}`;
+  let vite: Awaited<ReturnType<typeof createViteServer>> | null = null;
 
-  const injectSocialMetaTags = (
-    html: string,
-    meta: {
-      title: string;
-      description: string;
-      imageUrl: string;
-      pageUrl: string;
-      imageWidth?: number;
-      imageHeight?: number;
-    }
-  ): string => {
-    let result = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${meta.title}</title>`);
-
-    const upsert = (pattern: RegExp, tag: string) => {
-      if (pattern.test(result)) {
-        result = result.replace(pattern, tag);
-      } else {
-        result = result.replace("</head>", `${tag}\n</head>`);
-      }
-    };
-
-    const safeTitle = meta.title.replace(/"/g, "&quot;");
-    const safeDesc = meta.description.replace(/"/g, "&quot;");
-    const mimeType = meta.imageUrl.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
-    const imgWidth = meta.imageWidth || 1200;
-    const imgHeight = meta.imageHeight || 630;
-
-    upsert(/<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${safeDesc}" />`);
-    upsert(/<meta\s+property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${safeTitle}" />`);
-    upsert(/<meta\s+property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${safeDesc}" />`);
-    upsert(/<meta\s+property=["']og:image["'][^>]*>/i, `<meta property="og:image" content="${meta.imageUrl}" />`);
-    if (meta.imageUrl.startsWith("https://")) {
-      upsert(/<meta\s+property=["']og:image:secure_url["'][^>]*>/i, `<meta property="og:image:secure_url" content="${meta.imageUrl}" />`);
-    }
-    upsert(/<meta\s+property=["']og:image:type["'][^>]*>/i, `<meta property="og:image:type" content="${mimeType}" />`);
-    upsert(/<meta\s+property=["']og:image:width["'][^>]*>/i, `<meta property="og:image:width" content="${imgWidth}" />`);
-    upsert(/<meta\s+property=["']og:image:height["'][^>]*>/i, `<meta property="og:image:height" content="${imgHeight}" />`);
-    upsert(/<meta\s+property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${meta.pageUrl}" />`);
-    upsert(/<meta\s+(?:property|name)=["']twitter:card["'][^>]*>/i, `<meta name="twitter:card" content="summary_large_image" />`);
-    upsert(/<meta\s+(?:property|name)=["']twitter:url["'][^>]*>/i, `<meta name="twitter:url" content="${meta.pageUrl}" />`);
-    upsert(/<meta\s+(?:property|name)=["']twitter:title["'][^>]*>/i, `<meta property="twitter:title" content="${safeTitle}" />`);
-    upsert(/<meta\s+(?:property|name)=["']twitter:description["'][^>]*>/i, `<meta name="twitter:description" content="${safeDesc}" />`);
-    upsert(/<meta\s+(?:property|name)=["']twitter:image["'][^>]*>/i, `<meta property="twitter:image" content="${meta.imageUrl}" />`);
-    upsert(/<meta\s+(?:property|name)=["']twitter:image:src["'][^>]*>/i, `<meta name="twitter:image:src" content="${meta.imageUrl}" />`);
-    upsert(/<link\s+rel=["']image_src["'][^>]*>/i, `<link rel="image_src" href="${meta.imageUrl}" />`);
-    upsert(/<meta\s+itemprop=["']image["'][^>]*>/i, `<meta itemprop="image" content="${meta.imageUrl}" />`);
-
-    return result;
-  };
-
-  let vite: any;
-
-  const renderBlogPostPage = async (req: express.Request, res: express.Response, postId: string) => {
-    const isProd = process.env.NODE_ENV === "production";
-    const builtStaticPath = path.resolve(rootDir, "dist", `${postId}.html`);
+  const renderBlogPostPage = async (
+    req: express.Request,
+    res: express.Response,
+    postId: string,
+  ): Promise<boolean> => {
+    const isProd = process.env.NODE_ENV === 'production';
+    const builtStaticPath = path.resolve(rootDir, 'dist', `${postId}.html`);
     if (isProd && fs.existsSync(builtStaticPath)) {
-      const html = fs.readFileSync(builtStaticPath, "utf-8");
-      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      const html = fs.readFileSync(builtStaticPath, 'utf-8');
+      res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(html);
       return true;
     }
 
     const post = loadBlogPostById(rootDir, postId);
     if (!post) return false;
 
-    let templatePath = path.resolve(rootDir, isProd ? "dist/blog-post.html" : "blog-post.html");
+    let templatePath = path.resolve(rootDir, isProd ? 'dist/blog-post.html' : 'blog-post.html');
     if (!fs.existsSync(templatePath)) {
-      templatePath = path.resolve(rootDir, "blog-post.html");
+      templatePath = path.resolve(rootDir, 'blog-post.html');
     }
-    let template = fs.readFileSync(templatePath, "utf-8");
+    let template = fs.readFileSync(templatePath, 'utf-8');
     template = prerenderBlogPostHtml(template, post, getOrigin(req), CONFIG.JOIN_REDIRECT_LINK);
 
     if (vite) {
       template = await vite.transformIndexHtml(req.originalUrl, template);
     }
 
-    res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(template);
     return true;
   };
 
-  // Serve /blogs/index.json and /blogs/:slug.json directly from the /blogs folder
-  app.get("/blogs/index.json", (_req, res) => {
+  app.get('/posts/index.json', (_req, res) => {
+    const posts = loadAllDirectoryPosts(rootDir);
+    res.status(200).json(buildDirectoryPostsIndex(posts));
+  });
+
+  app.get('/blogs/index.json', (_req, res) => {
     const posts = loadAllBlogPosts(rootDir);
     res.status(200).json(buildBlogIndex(posts));
   });
 
-  app.get("/blogs/:slug.json", (req, res, next) => {
-    const post = loadBlogPostById(rootDir, req.params.slug);
+  app.get('/blogs/:slug.json', (req, res, next) => {
+    const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
+    const post = loadBlogPostById(rootDir, slug);
     if (!post) return next();
     res.status(200).json(post);
   });
 
-  // Direct endpoint for post image previews
-  app.get(["/preview/:slug.jpg", "/preview-image/:slug.jpg"], async (req, res) => {
-    const { slug } = req.params;
-    if (!/^[a-z0-9-]+$/i.test(slug)) {
+  app.get(['/preview/:slug.jpg', '/preview-image/:slug.jpg'], async (req, res) => {
+    const rawSlug = req.params.slug;
+    const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+    if (!slug || !/^[a-z0-9-]+$/i.test(slug)) {
       return res.status(404).end();
     }
 
     const candidateLocalPaths = [
-      path.resolve(rootDir, "dist", "preview", `${slug}.jpg`),
-      path.resolve(rootDir, "public", "preview", `${slug}.jpg`),
-      path.resolve(rootDir, "public", "blogs", `${slug}-preview.jpg`),
+      path.resolve(rootDir, 'dist', 'preview', `${slug}.jpg`),
+      path.resolve(rootDir, 'public', 'preview', `${slug}.jpg`),
+      path.resolve(rootDir, 'public', 'blogs', `${slug}-preview.jpg`),
     ];
 
     for (const localPath of candidateLocalPaths) {
       if (fs.existsSync(localPath)) {
-        res.setHeader("Content-Type", "image/jpeg");
-        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         return res.sendFile(localPath);
       }
     }
 
-    const postDataPath = path.resolve(rootDir, "public", "posts", `${slug}.json`);
+    const postDataPath = path.resolve(rootDir, 'public', 'posts', `${slug}.json`);
     if (fs.existsSync(postDataPath)) {
-      const post = JSON.parse(fs.readFileSync(postDataPath, "utf-8"));
+      const post = JSON.parse(fs.readFileSync(postDataPath, 'utf-8'));
       const remoteSource = getRemoteSocialPreviewSource(post);
       if (remoteSource) {
         const fetched = await fetchVerifiedImageBytes(
           remoteSource,
           post.socialPreviewImageFallback,
-          3000
+          4000,
         );
         if (fetched) {
-          res.setHeader("Content-Type", fetched.meta.mimeType);
-          res.setHeader("Cache-Control", "public, max-age=86400");
-          res.setHeader("Access-Control-Allow-Origin", "*");
+          res.setHeader('Content-Type', fetched.meta.mimeType);
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+          res.setHeader('Access-Control-Allow-Origin', '*');
           return res.status(200).send(Buffer.from(fetched.bytes));
         }
         return res.redirect(302, post.socialPreviewImageFallback || remoteSource);
       }
     }
 
-    res.status(404).end();
+    return res.status(404).end();
   });
 
-  // Handler for post.html & /post with dynamic meta tags for social media previews
-  app.get(["/post", "/post.html"], async (req, res, next) => {
+  app.get(['/post', '/post.html'], async (req, res, next) => {
     try {
-      const postId = req.query.id as string;
-      const isProd = process.env.NODE_ENV === "production";
-      let templatePath = path.resolve(rootDir, isProd ? "dist/post.html" : "post.html");
+      const postId = typeof req.query.id === 'string' ? req.query.id : '';
+      const isProd = process.env.NODE_ENV === 'production';
+      let templatePath = path.resolve(rootDir, isProd ? 'dist/post.html' : 'post.html');
       if (!fs.existsSync(templatePath)) {
-        templatePath = path.resolve(rootDir, "post.html");
+        templatePath = path.resolve(rootDir, 'post.html');
       }
 
-      let template = fs.readFileSync(templatePath, "utf-8").replaceAll("%LINKHUB_ORIGIN%", getOrigin(req));
+      const origin = getOrigin(req);
+      let template = fs.readFileSync(templatePath, 'utf-8').replaceAll('%LINKHUB_ORIGIN%', origin);
 
       if (postId && /^[a-z0-9-]+$/i.test(postId)) {
-        const postDataPath = path.resolve(rootDir, "public", "posts", `${postId}.json`);
+        const postDataPath = path.resolve(rootDir, 'public', 'posts', `${postId}.json`);
         if (fs.existsSync(postDataPath)) {
-          const post = JSON.parse(fs.readFileSync(postDataPath, "utf-8"));
+          const post = JSON.parse(fs.readFileSync(postDataPath, 'utf-8')) as DirectoryPostDetail;
           const previewImage = resolveDirectoryPostPreviewImage({
             id: post.id || postId,
             image: post.image,
             socialPreviewImage: post.socialPreviewImage,
           });
-          template = injectSocialMetaTags(template, {
-            title: `${post.title} | LinkHub`,
+          const canonicalUrl = `${origin}/post?id=${encodeURIComponent(post.id || postId)}`;
+          template = injectSocialMetaIntoHtml(template, {
+            documentTitle: `${post.title} | LinkHub`,
+            title: post.title,
             description: post.description,
             imageUrl: getAbsoluteUrl(req, previewImage),
-            imageWidth: post.socialPreviewImageWidth,
-            imageHeight: post.socialPreviewImageHeight,
-            pageUrl: getPageUrl(req),
+            imageWidth: post.socialPreviewImageWidth || 1200,
+            imageHeight: post.socialPreviewImageHeight || 630,
+            pageUrl: `${origin}${req.originalUrl}`,
+            canonicalUrl,
           });
+          template = prerenderDirectoryPostBodyIntoHtml(template, post, CONFIG.JOIN_REDIRECT_LINK);
         }
       }
 
@@ -214,122 +191,100 @@ async function startServer() {
         template = await vite.transformIndexHtml(req.originalUrl, template);
       }
 
-      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(template);
     } catch (e) {
-      if (vite) vite.ssrFixStacktrace(e);
+      if (vite && e instanceof Error) vite.ssrFixStacktrace(e);
       next(e);
     }
   });
 
-  // Handler for blog.html & /blog
-  app.get(["/blog", "/blog.html"], async (req, res, next) => {
+  app.get(['/blog', '/blog.html'], async (req, res, next) => {
     try {
-      const isProd = process.env.NODE_ENV === "production";
-      let templatePath = path.resolve(rootDir, isProd ? "dist/blog.html" : "blog.html");
+      const isProd = process.env.NODE_ENV === 'production';
+      let templatePath = path.resolve(rootDir, isProd ? 'dist/blog.html' : 'blog.html');
       if (!fs.existsSync(templatePath)) {
-        templatePath = path.resolve(rootDir, "blog.html");
+        templatePath = path.resolve(rootDir, 'blog.html');
       }
-      let template = fs.readFileSync(templatePath, "utf-8").replaceAll("%LINKHUB_ORIGIN%", getOrigin(req));
+      let template = fs.readFileSync(templatePath, 'utf-8').replaceAll('%LINKHUB_ORIGIN%', getOrigin(req));
       if (vite) {
-        template = await vite.transformIndexHtml(req.originalUrl, template);
+        template = await vite.transformIndexHtml('/blog.html', template);
       }
-      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(template);
     } catch (e) {
-      if (vite) vite.ssrFixStacktrace(e);
+      if (vite && e instanceof Error) vite.ssrFixStacktrace(e);
       next(e);
     }
   });
 
-  // Handler for blog-post.html & /blog-post?id=<slug>
-  app.get(["/blog-post", "/blog-post.html"], async (req, res, next) => {
+  app.get(['/blog-post', '/blog-post.html'], async (req, res, next) => {
     try {
-      const postId = (req.query.id as string) || "romantic-ways-to-ask-her-to-be-your-girlfriend";
+      const postId = typeof req.query.id === 'string' ? req.query.id : '';
+      if (!postId) {
+        return res.redirect(302, '/blog');
+      }
       const handled = await renderBlogPostPage(req, res, postId);
       if (handled) return;
-
-      const isProd = process.env.NODE_ENV === "production";
-      let templatePath = path.resolve(rootDir, isProd ? "dist/blog-post.html" : "blog-post.html");
-      if (!fs.existsSync(templatePath)) {
-        templatePath = path.resolve(rootDir, "blog-post.html");
-      }
-      let template = fs.readFileSync(templatePath, "utf-8").replaceAll("%LINKHUB_ORIGIN%", getOrigin(req));
-      if (vite) {
-        template = await vite.transformIndexHtml(req.originalUrl, template);
-      }
-      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      next();
     } catch (e) {
-      if (vite) vite.ssrFixStacktrace(e);
+      if (vite && e instanceof Error) vite.ssrFixStacktrace(e);
       next(e);
     }
   });
 
-  // Automatically serve any /<slug>, /<slug>.html, /blog/<slug>, or /posts/<slug> matching blogs/<slug>.json
-  app.get(["/:slug", "/blog/:slug", "/posts/:slug"], async (req, res, next) => {
+  app.get(['/:slug', '/blog/:slug'], async (req, res, next) => {
     try {
-      const rawSlug = req.params.slug || "";
-      const slug = rawSlug.replace(/\.html$/i, "");
-      if (!slug || ["index", "post", "blog", "blog-post"].includes(slug)) {
+      const paramSlug = req.params.slug;
+      const rawSlug = (Array.isArray(paramSlug) ? paramSlug[0] : paramSlug) || '';
+      const slug = rawSlug.replace(/\.html$/i, '');
+      if (!slug || ['index', 'post', 'blog', 'blog-post', '404'].includes(slug)) {
         return next();
       }
       const handled = await renderBlogPostPage(req, res, slug);
       if (!handled) return next();
     } catch (e) {
-      if (vite) vite.ssrFixStacktrace(e);
+      if (vite && e instanceof Error) vite.ssrFixStacktrace(e);
       next(e);
     }
   });
 
-  // Vite middleware for development (after custom HTML routes)
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== 'production') {
     vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: "custom",
+      appType: 'custom',
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.join(rootDir, "dist")));
+    app.use(express.static(path.join(rootDir, 'dist')));
   }
 
-  // Fallback for index / other routes
-  app.get("*", async (req, res, next) => {
-    const url = req.originalUrl;
-
+  app.use(async (req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
     try {
-      const templatePath = path.resolve(rootDir, "index.html");
-      let template = fs.readFileSync(templatePath, "utf-8").replaceAll("%LINKHUB_ORIGIN%", getOrigin(req));
-
-      try {
-        const indexPath = path.resolve(rootDir, "public", "posts", "index.json");
-        if (fs.existsSync(indexPath)) {
-          const posts = JSON.parse(fs.readFileSync(indexPath, "utf-8"));
-          if (posts.length > 0) {
-            const firstPost = posts[0];
-            template = template.replace(
-              /<meta property="og:image" content=".*?" \/>/,
-              `<meta property="og:image" content="${firstPost.image}" />`
-            );
-            template = template.replace(
-              /<meta property="twitter:image" content=".*?" \/>/,
-              `<meta property="twitter:image" content="${firstPost.image}" />`
-            );
-          }
+      const isRoot = req.path === '/' || req.path === '/index.html';
+      if (!isRoot) {
+        const notFoundPath = path.resolve(rootDir, 'public', '404.html');
+        if (fs.existsSync(notFoundPath)) {
+          return res
+            .status(404)
+            .set({ 'Content-Type': 'text/html; charset=utf-8' })
+            .end(fs.readFileSync(notFoundPath, 'utf-8'));
         }
-      } catch (error) {
-        console.error("Error injecting home page meta tags:", error);
+        return res.status(404).end('Not Found');
       }
 
+      const templatePath = path.resolve(rootDir, 'index.html');
+      let template = fs.readFileSync(templatePath, 'utf-8').replaceAll('%LINKHUB_ORIGIN%', getOrigin(req));
       if (vite) {
-        template = await vite.transformIndexHtml(url, template);
+        template = await vite.transformIndexHtml('/index.html', template);
       }
-
-      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(template);
     } catch (e) {
-      if (vite) vite.ssrFixStacktrace(e);
+      if (vite && e instanceof Error) vite.ssrFixStacktrace(e);
       next(e);
     }
   });
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
