@@ -1,62 +1,56 @@
 import './index.css';
-import { initTheme } from './theme';
-import { initTelegramPromo } from './telegram-promo';
-import { initMobileMenu } from './navigation';
 import { CONFIG } from './config';
+import { initMobileMenu } from './navigation';
+import {
+  DirectoryPostDetail,
+  renderDirectoryPostContentHtml,
+  renderGroupCardHtml,
+  sanitizeUrl,
+} from './post-renderer';
 import { resolveDirectoryPostPreviewImage } from './social-preview';
-import { inject } from '@vercel/analytics';
+import { initTelegramPromo } from './telegram-promo';
+import { initTheme } from './theme';
 
-inject();
-if (new URLSearchParams(window.location.search).get('id')) {
-  initTelegramPromo();
+const VALID_POST_ID = /^[a-z0-9-]+$/i;
+
+let toastTimer: number | undefined;
+
+function showToast(message: string) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toast-message');
+  if (!toast || !toastMsg) return;
+
+  if (toastTimer !== undefined) {
+    clearTimeout(toastTimer);
+  }
+
+  toastMsg.textContent = message;
+  toast.classList.remove('translate-y-32');
+  toast.classList.add('translate-y-0');
+
+  toastTimer = window.setTimeout(() => {
+    toast.classList.remove('translate-y-0');
+    toast.classList.add('translate-y-32');
+  }, 3000);
 }
 
-interface Group {
-  name: string;
-  description: string;
-  members: string;
-  link: string;
-}
-
-interface PostDetail {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  socialPreviewImage?: string;
-  category: string;
-  intro: string;
-  content: string;
-  groups: Group[];
-}
-
-async function fetchPostDetail(id: string) {
+async function fetchPostDetail(id: string): Promise<DirectoryPostDetail | null> {
+  if (!VALID_POST_ID.test(id)) return null;
   try {
-    const url = `${window.location.origin}/posts/${id}.json`;
-    console.log('Fetching post from:', url);
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.error(`Post fetch failed: ${response.status} ${response.statusText}`);
-      throw new Error('Post not found');
-    }
-    return await response.json() as PostDetail;
-  } catch (error) {
-    console.error('Error fetching post detail:', error);
+    const response = await fetch(`/posts/${encodeURIComponent(id)}.json`);
+    if (!response.ok) return null;
+    return (await response.json()) as DirectoryPostDetail;
+  } catch {
     return null;
   }
 }
 
-function updateMetaTags(post: PostDetail) {
-  // Update Title
+function updateMetaTags(post: DirectoryPostDetail) {
   document.title = `${post.title} | LinkHub`;
 
-  // Update Description
   const metaDescription = document.querySelector('meta[name="description"]');
-  if (metaDescription) {
-    metaDescription.setAttribute('content', post.description);
-  }
+  if (metaDescription) metaDescription.setAttribute('content', post.description);
 
-  // Update Open Graph
   const ogTitle = document.querySelector('meta[property="og:title"]');
   if (ogTitle) ogTitle.setAttribute('content', post.title);
 
@@ -64,9 +58,9 @@ function updateMetaTags(post: PostDetail) {
   if (ogDescription) ogDescription.setAttribute('content', post.description);
 
   const rawPreviewImage = resolveDirectoryPostPreviewImage(post);
-  const absoluteImage = rawPreviewImage.startsWith('http') 
-    ? rawPreviewImage 
-    : `${window.location.origin}${rawPreviewImage.startsWith('/') ? rawPreviewImage : '/' + rawPreviewImage}`;
+  const absoluteImage = rawPreviewImage.startsWith('http')
+    ? rawPreviewImage
+    : `${window.location.origin}${rawPreviewImage.startsWith('/') ? rawPreviewImage : `/${rawPreviewImage}`}`;
 
   const ogImage = document.querySelector('meta[property="og:image"]');
   if (ogImage) ogImage.setAttribute('content', absoluteImage);
@@ -74,10 +68,13 @@ function updateMetaTags(post: PostDetail) {
   const ogImageSecure = document.querySelector('meta[property="og:image:secure_url"]');
   if (ogImageSecure) ogImageSecure.setAttribute('content', absoluteImage);
 
-  const ogUrl = document.querySelector('meta[property="og:url"]');
-  if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+  const canonicalHref = `${window.location.origin}/post?id=${encodeURIComponent(post.id)}`;
+  const canonicalLink = document.querySelector('link[rel="canonical"]');
+  if (canonicalLink) canonicalLink.setAttribute('href', canonicalHref);
 
-  // Update Twitter
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', canonicalHref);
+
   const twitterTitle = document.querySelector('meta[property="twitter:title"], meta[name="twitter:title"]');
   if (twitterTitle) twitterTitle.setAttribute('content', post.title);
 
@@ -91,91 +88,86 @@ function updateMetaTags(post: PostDetail) {
   if (twitterImageSrc) twitterImageSrc.setAttribute('content', absoluteImage);
 
   const twitterUrl = document.querySelector('meta[property="twitter:url"], meta[name="twitter:url"]');
-  if (twitterUrl) twitterUrl.setAttribute('content', window.location.href);
+  if (twitterUrl) twitterUrl.setAttribute('content', canonicalHref);
 }
 
-function createGroupCard(group: Group) {
-  const card = document.createElement('div');
-  card.className = 'bg-white/5 dark:bg-slate-800/50 backdrop-blur-xl border border-white/10 dark:border-slate-700/50 p-5 sm:p-8 rounded-[1.75rem] sm:rounded-[2rem] flex flex-col md:flex-row items-start sm:items-center justify-between gap-5 sm:gap-8 hover:bg-white/10 dark:hover:bg-slate-800 transition-all duration-300 group';
-  
-  const effectiveLink = CONFIG.JOIN_REDIRECT_LINK;
+function wireInteractiveHandlers(getShareMeta: () => { title: string; text: string; url: string }) {
+  document.getElementById('share-btn')?.addEventListener('click', async () => {
+    const shareData = getShareMeta();
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // User cancelled native share sheet
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+    } catch {
+      // Ignore clipboard failure
+    }
+    showToast('Link copied to clipboard!');
+  });
 
-  card.innerHTML = `
-    <div class="flex-1 text-left w-full">
-      <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-2.5">
-        <h3 class="text-xl sm:text-2xl font-bold text-white font-display group-hover:text-emerald-400 transition-colors">${group.name}</h3>
-        <div class="flex items-center gap-2">
-          ${group.members ? `<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">${group.members} Members</span>` : ''}
-          <span class="opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Verified
-          </span>
-        </div>
-      </div>
-      <p class="text-slate-400 dark:text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl group-hover:text-white transition-colors">${group.description}</p>
-    </div>
-    <div class="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
-      <button class="copy-btn min-w-[48px] min-h-[48px] p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 dark:bg-slate-700/50 text-slate-400 hover:text-white hover:bg-white/10 dark:hover:bg-slate-700 transition-all border border-white/5 dark:border-slate-700 flex items-center justify-center active:scale-95" data-link="${effectiveLink}" title="Copy Link" aria-label="Copy group link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-      </button>
-      <a 
-        href="${effectiveLink}" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        class="join-btn flex-1 md:flex-none inline-flex items-center justify-center min-h-[48px] py-3.5 px-6 sm:px-10 rounded-xl sm:rounded-2xl bg-emerald-500 text-slate-900 font-extrabold text-sm sm:text-base hover:bg-white hover:text-slate-900 transition-all shadow-xl shadow-emerald-500/20 active:scale-[0.98]"
-      >
-        JOIN NOW
-      </a>
-    </div>
-  `;
-  
-  return card;
-}
+  document.addEventListener('click', e => {
+    const btn = (e.target as HTMLElement).closest('.copy-btn');
+    if (btn) {
+      const link = btn.getAttribute('data-link');
+      if (link) {
+        void navigator.clipboard.writeText(link).catch(() => {});
+        showToast('Group link copied!');
+      }
+    }
+  });
 
-function showToast(message: string) {
-  const toast = document.getElementById('toast');
-  const toastMsg = document.getElementById('toast-message');
-  if (!toast || !toastMsg) return;
-  
-  toastMsg.textContent = message;
-  toast.classList.remove('translate-y-32');
-  toast.classList.add('translate-y-0');
-  
-  setTimeout(() => {
-    toast.classList.remove('translate-y-0');
-    toast.classList.add('translate-y-32');
-  }, 3000);
+  let hasClickedAd = false;
+  document.addEventListener('click', e => {
+    const joinBtn = (e.target as HTMLElement).closest('.join-btn');
+    if (joinBtn && !hasClickedAd) {
+      hasClickedAd = true;
+      window.open(CONFIG.AD_SMART_LINK, '_blank', 'noopener,noreferrer');
+    }
+  });
 }
 
 async function init() {
-  console.log('Initializing post page...');
   const urlParams = new URLSearchParams(window.location.search);
   const postId = urlParams.get('id');
-  
-  console.log('Post ID:', postId);
-  
-  if (!postId) {
-    console.error('No post ID found in URL');
-    window.location.href = '/';
+
+  if (!postId || !VALID_POST_ID.test(postId)) {
+    window.location.replace('/');
     return;
   }
 
   initTheme();
   initMobileMenu();
+  initTelegramPromo();
+
+  const headerEl = document.getElementById('post-header');
+  const prerenderedId = headerEl?.dataset.prerenderedId;
+
+  // If Edge middleware or SSR already rendered the full post body, wire handlers immediately with 0 extra fetch
+  if (prerenderedId && prerenderedId.toLowerCase() === postId.toLowerCase()) {
+    const titleText = document.getElementById('post-title')?.textContent?.trim() || document.title;
+    const descText = document.getElementById('post-description')?.textContent?.trim() || '';
+    wireInteractiveHandlers(() => ({
+      title: titleText,
+      text: descText,
+      url: `${window.location.origin}/post?id=${encodeURIComponent(prerenderedId)}`,
+    }));
+    return;
+  }
 
   const post = await fetchPostDetail(postId);
-  console.log('Fetched post:', post);
-  
   if (!post) {
-    console.error('Post not found or fetch failed');
-    const container = document.getElementById('post-header');
-    if (container) {
-      container.innerHTML = `
+    if (headerEl) {
+      headerEl.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 py-20 text-center">
           <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-4">Post Not Found</h1>
-          <p class="text-slate-500 dark:text-slate-400 mb-8">The post you are looking for does not exist or could not be loaded.</p>
+          <p class="text-slate-500 dark:text-slate-400 mb-8">The community directory you requested does not exist or could not be loaded.</p>
           <a href="/" class="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
             Return to Directory
           </a>
         </div>
@@ -184,85 +176,46 @@ async function init() {
     return;
   }
 
-  // Update Meta Tags
   updateMetaTags(post);
 
-  // Update DOM
-  const elements = {
+  const textFields: Record<string, string> = {
     'post-title': post.title,
     'post-description': post.description,
     'post-category': post.category,
     'post-intro': post.intro,
-    'post-content': post.content,
-    'group-count': `${post.groups?.length || 0} Groups Available`
+    'group-count': `${post.groups?.length || 0} Groups Available`,
   };
 
-  Object.entries(elements).forEach(([id, value]) => {
+  Object.entries(textFields).forEach(([id, value]) => {
     const el = document.getElementById(id);
     if (el && value) {
-      if (id === 'post-content') {
-        el.innerHTML = value.split('\n').map(p => `<p class="mb-4">${p}</p>`).join('');
-      } else {
-        el.textContent = value;
-      }
+      el.textContent = value;
     }
   });
-  
-  const img = document.getElementById('post-image') as HTMLImageElement;
+
+  const contentEl = document.getElementById('post-content');
+  if (contentEl && post.content) {
+    contentEl.innerHTML = renderDirectoryPostContentHtml(post.content);
+  }
+
+  const img = document.getElementById('post-image') as HTMLImageElement | null;
   if (img) {
-    img.src = post.image;
+    img.src = sanitizeUrl(post.image, '/og-default.jpg');
     img.alt = post.title;
   }
 
   const groupsList = document.getElementById('groups-list');
   if (groupsList) {
-    groupsList.innerHTML = '';
-    post.groups.forEach(group => {
-      groupsList.appendChild(createGroupCard(group));
-    });
+    groupsList.innerHTML = (post.groups || [])
+      .map(group => renderGroupCardHtml(group, CONFIG.JOIN_REDIRECT_LINK))
+      .join('\n');
   }
 
-  // Share button
-  document.getElementById('share-btn')?.addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        text: post.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      showToast('Link copied to clipboard!');
-    }
-  });
-
-  // Copy buttons
-  document.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('.copy-btn');
-    if (btn) {
-      const link = btn.getAttribute('data-link');
-      if (link) {
-        navigator.clipboard.writeText(link);
-        showToast('Group link copied!');
-      }
-    }
-  });
-
-  // Click logic for Join buttons
-  let hasClickedAd = false;
-  document.addEventListener('click', (e) => {
-    const joinBtn = (e.target as HTMLElement).closest('.join-btn');
-    if (joinBtn && !hasClickedAd) {
-      hasClickedAd = true;
-      window.open(CONFIG.AD_SMART_LINK, '_blank');
-    }
-  });
+  wireInteractiveHandlers(() => ({
+    title: post.title,
+    text: post.description,
+    url: `${window.location.origin}/post?id=${encodeURIComponent(post.id)}`,
+  }));
 }
 
-console.log('Post script loaded');
-
-// Initialize
-window.addEventListener('load', () => {
-  console.log('Window loaded, running init');
-  init();
-});
+void init();

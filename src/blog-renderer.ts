@@ -60,7 +60,21 @@ export function escapeHtml(value: string): string {
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function safeHrefOrSrc(raw: string | undefined, fallback = '/'): string {
+  if (!raw) return fallback;
+  const trimmed = raw.trim();
+  if (
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    (trimmed.startsWith('/') && !trimmed.startsWith('//'))
+  ) {
+    return trimmed;
+  }
+  return fallback;
 }
 
 export function getBlogPostPath(post: Pick<BlogPost, 'id' | 'url'>): string {
@@ -135,17 +149,21 @@ export function renderBlogBodyHtml(post: BlogPost, joinRedirectLink: string): st
 
       if (section.image) {
         const imgAlt = escapeHtml(section.imageAlt || section.heading || post.title);
+        const safeImg = escapeHtml(safeHrefOrSrc(section.image, '/og-default.jpg'));
         parts.push(`
-          <div class="my-6 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-lg">
+          <div class="my-6 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-lg bg-slate-100 dark:bg-slate-800">
             <img
-              src="${escapeHtml(section.image)}"
+              src="${safeImg}"
               alt="${imgAlt}"
+              width="1000"
+              height="600"
+              decoding="async"
               class="w-full h-auto max-h-[450px] object-cover"
               loading="lazy"
             />
             ${
               section.imageCaption
-                ? `<p class="text-xs text-center py-2.5 px-4 bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-medium italic">${escapeHtml(section.imageCaption)}</p>`
+                ? `<p class="text-xs text-center py-2.5 px-4 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-medium italic">${escapeHtml(section.imageCaption)}</p>`
                 : ''
             }
           </div>
@@ -155,17 +173,17 @@ export function renderBlogBodyHtml(post: BlogPost, joinRedirectLink: string): st
       if (section.whatsappCta) {
         const cta = section.whatsappCta;
         const eyebrow = escapeHtml(cta.eyebrow || 'Featured WhatsApp Community');
-        const href = escapeHtml(cta.groupLink || joinRedirectLink);
+        const href = escapeHtml(safeHrefOrSrc(cta.groupLink || joinRedirectLink, joinRedirectLink));
         const buttonText = escapeHtml(cta.buttonText || 'Join WhatsApp Groups');
         parts.push(`
           <div class="my-8 p-6 sm:p-8 rounded-[2rem] bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-slate-100 dark:to-slate-800/60 border border-emerald-500/20 shadow-md">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
               <div class="space-y-1.5 flex-1">
                 <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                   <span>${eyebrow}</span>
                 </div>
-                <h4 class="text-xl font-bold text-slate-900 dark:text-white font-display">${escapeHtml(cta.title)}</h4>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">${escapeHtml(cta.title)}</h3>
                 <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${escapeHtml(cta.description)}</p>
               </div>
               <a
@@ -174,7 +192,7 @@ export function renderBlogBodyHtml(post: BlogPost, joinRedirectLink: string): st
                 rel="noopener noreferrer"
                 class="join-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-slate-950 font-black text-sm tracking-wide shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 <span>${buttonText}</span>
               </a>
             </div>
@@ -201,26 +219,30 @@ export function renderBlogTagsHtml(tags?: string[]): string {
 }
 
 export function renderHomeFeaturedBlogCardHtml(post: BlogPostPreview): string {
-  const articleUrl = escapeHtml(post.url || `/${post.id}`);
+  const articleUrl = escapeHtml(safeHrefOrSrc(post.url || `/${post.id}`, `/${post.id}`));
   const imgAlt = escapeHtml(post.imageAlt || post.title);
+  const safeImg = escapeHtml(safeHrefOrSrc(post.coverImage, '/og-default.jpg'));
   return `
-    <article class="premium-card group flex flex-col justify-between h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[1.75rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-xl shadow-slate-200/40 dark:shadow-none hover:-translate-y-1 transition-all duration-300">
+    <article class="premium-card group flex flex-col justify-between h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[1.75rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-xl shadow-slate-200/40 dark:shadow-none hover:-translate-y-1 transition-transform duration-300">
       <div>
-        <div class="aspect-[16/10] overflow-hidden relative rounded-[1.4rem] sm:rounded-[1.8rem] mb-5 sm:mb-6">
+        <div class="aspect-[16/10] overflow-hidden relative rounded-[1.4rem] sm:rounded-[1.8rem] mb-5 sm:mb-6 bg-slate-100 dark:bg-slate-800">
           <img
-            src="${escapeHtml(post.coverImage)}"
+            src="${safeImg}"
             alt="${imgAlt}"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            width="800"
+            height="500"
+            decoding="async"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             loading="lazy"
           />
           <div class="absolute top-3 left-3 sm:top-4 sm:left-4 z-10">
-            <span class="px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-emerald-600 dark:text-emerald-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest shadow-md">
+            <span class="px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white/95 dark:bg-slate-900/95 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-widest shadow-md">
               ${escapeHtml(post.category)}
             </span>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2 sm:mb-3">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 sm:mb-3">
           <span>${escapeHtml(post.date)}</span>
           <span>•</span>
           <span>${escapeHtml(post.readTime)}</span>
@@ -230,19 +252,80 @@ export function renderHomeFeaturedBlogCardHtml(post: BlogPostPreview): string {
           ${escapeHtml(post.title)}
         </h3>
 
-        <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-5 sm:mb-6 line-clamp-3">
+        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5 sm:mb-6 line-clamp-3">
           ${escapeHtml(post.excerpt)}
         </p>
       </div>
 
       <div class="pt-4 sm:pt-5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">By ${escapeHtml(post.author)}</span>
+        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">By ${escapeHtml(post.author)}</span>
         <a
           href="${articleUrl}"
           class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 min-h-[44px] group/link"
         >
           <span>Read Guide</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="transform group-hover/link:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="transform group-hover/link:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+export function renderBlogIndexCardHtml(post: BlogPostPreview, eagerImage = false): string {
+  const articleUrl = escapeHtml(safeHrefOrSrc(post.url || `/${post.id}`, `/${post.id}`));
+  const imgAlt = escapeHtml(post.imageAlt || post.title);
+  const safeImg = escapeHtml(safeHrefOrSrc(post.coverImage, '/og-default.jpg'));
+  const loadingAttr = eagerImage ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+  const authorInitial = escapeHtml((post.author || 'L').charAt(0));
+
+  return `
+    <article class="premium-card group flex flex-col justify-between h-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[1.75rem] sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/40 dark:shadow-none hover:-translate-y-1 transition-transform duration-300">
+      <div>
+        <div class="aspect-[16/10] overflow-hidden relative rounded-[1.25rem] sm:rounded-[1.5rem] mb-4 sm:mb-6 bg-slate-100 dark:bg-slate-800">
+          <img
+            src="${safeImg}"
+            alt="${imgAlt}"
+            width="800"
+            height="500"
+            decoding="async"
+            ${loadingAttr}
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          />
+          <div class="absolute top-3 left-3 sm:top-4 sm:left-4 z-10">
+            <span class="px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white/95 dark:bg-slate-900/95 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-widest shadow-md">
+              ${escapeHtml(post.category)}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 sm:mb-3">
+          <span>${escapeHtml(post.date)}</span>
+          <span>•</span>
+          <span>${escapeHtml(post.readTime)}</span>
+        </div>
+
+        <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3 font-display group-hover:text-emerald-600 transition-colors leading-tight">
+          ${escapeHtml(post.title)}
+        </h3>
+
+        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 sm:mb-6 line-clamp-3">
+          ${escapeHtml(post.excerpt)}
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center">
+            ${authorInitial}
+          </div>
+          <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">${escapeHtml(post.author)}</span>
+        </div>
+        <a
+          href="${articleUrl}"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 min-h-[44px] group/link"
+        >
+          <span>Read Article</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="transform group-hover/link:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </a>
       </div>
     </article>

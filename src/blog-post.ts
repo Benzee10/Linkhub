@@ -1,36 +1,41 @@
 import './index.css';
-import { initTheme } from './theme';
-import { initTelegramPromo } from './telegram-promo';
-import { initMobileMenu } from './navigation';
-import { inject } from '@vercel/analytics';
-import { CONFIG } from './config';
-import { resolveBlogPostPreviewImage } from './social-preview';
 import {
   BlogPost,
   getBlogPostPath,
   renderBlogBodyHtml,
   renderBlogTagsHtml,
 } from './blog-renderer';
+import { CONFIG } from './config';
+import { initMobileMenu } from './navigation';
+import { resolveBlogPostPreviewImage } from './social-preview';
+import { initTelegramPromo } from './telegram-promo';
+import { initTheme } from './theme';
 
-inject();
-initTelegramPromo();
+const VALID_BLOG_ID = /^[a-z0-9-]+$/i;
+
+let toastTimer: number | undefined;
 
 function showToast(message: string) {
   const toast = document.getElementById('toast');
   const toastMessage = document.getElementById('toast-message');
   if (!toast || !toastMessage) return;
 
+  if (toastTimer !== undefined) {
+    clearTimeout(toastTimer);
+  }
+
   toastMessage.textContent = message;
   toast.classList.remove('translate-y-32');
   toast.classList.add('translate-y-0');
 
-  setTimeout(() => {
+  toastTimer = window.setTimeout(() => {
     toast.classList.remove('translate-y-0');
     toast.classList.add('translate-y-32');
   }, 2500);
 }
 
 async function fetchBlogPost(id: string): Promise<BlogPost | null> {
+  if (!VALID_BLOG_ID.test(id)) return null;
   try {
     const res = await fetch(`/blogs/${encodeURIComponent(id)}.json`);
     if (res.ok) {
@@ -68,6 +73,9 @@ function updateMeta(post: BlogPost) {
     : `${window.location.origin}${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`;
   const canonicalUrl = getShareUrlForPath(getBlogPostPath(post));
 
+  const canonicalLink = document.querySelector('link[rel="canonical"]');
+  if (canonicalLink) canonicalLink.setAttribute('href', canonicalUrl);
+
   const ogImg = document.querySelector('meta[property="og:image"]');
   if (ogImg) ogImg.setAttribute('content', absoluteImage);
 
@@ -99,7 +107,7 @@ function setupShareAndJoinHandlers(getShareData: () => { title: string; text: st
         await navigator.share(shareData);
         return;
       } catch {
-        // User dismissed share dialog or unsupported
+        // User dismissed share dialog
       }
     }
     try {
@@ -110,18 +118,17 @@ function setupShareAndJoinHandlers(getShareData: () => { title: string; text: st
     showToast('Article link copied to clipboard!');
   });
 
-  // Trigger Adsterra smart link once per page session on Join button click
   let hasClickedAd = false;
   document.addEventListener('click', e => {
     const joinBtn = (e.target as HTMLElement).closest('.join-btn');
     if (joinBtn && !hasClickedAd) {
       hasClickedAd = true;
-      window.open(CONFIG.AD_SMART_LINK, '_blank');
+      window.open(CONFIG.AD_SMART_LINK, '_blank', 'noopener,noreferrer');
     }
   });
 }
 
-function resolveRequestedPostId(): string {
+function resolveRequestedPostId(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
   const queryId = urlParams.get('id');
   if (queryId) return queryId;
@@ -135,17 +142,18 @@ function resolveRequestedPostId(): string {
     return cleanPathname;
   }
 
-  return 'romantic-ways-to-ask-her-to-be-your-girlfriend';
+  return null;
 }
 
 async function initBlogPost() {
   initTheme();
   initMobileMenu();
+  initTelegramPromo();
 
   const articleEl = document.querySelector('article[data-prerendered-id]') as HTMLElement | null;
   const prerenderedId = articleEl?.dataset.prerenderedId;
 
-  // If Vite build or dev server already pre-rendered the full article HTML, wire interactions directly
+  // Pre-rendered static HTML path: zero JSON fetch needed
   if (prerenderedId) {
     const titleEl = document.getElementById('blog-title');
     const excerptEl = document.getElementById('blog-excerpt');
@@ -160,6 +168,11 @@ async function initBlogPost() {
   }
 
   const postId = resolveRequestedPostId();
+  if (!postId) {
+    window.location.replace('/blog');
+    return;
+  }
+
   const post = await fetchBlogPost(postId);
 
   const titleEl = document.getElementById('blog-title');
@@ -177,7 +190,7 @@ async function initBlogPost() {
     if (excerptEl) excerptEl.textContent = 'The requested blog post could not be loaded.';
     if (bodyEl) {
       bodyEl.innerHTML =
-        '<p class="text-center py-10"><a href="/blog.html" class="text-emerald-500 font-bold hover:underline">Return to Blog</a></p>';
+        '<p class="text-center py-10"><a href="/blog" class="text-emerald-500 font-bold hover:underline">Return to Blog</a></p>';
     }
     return;
   }
@@ -208,4 +221,4 @@ async function initBlogPost() {
   }));
 }
 
-window.addEventListener('load', initBlogPost);
+void initBlogPost();

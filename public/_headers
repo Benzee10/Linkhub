@@ -1,0 +1,38 @@
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/preview/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+/posts/*
+  Cache-Control: public, max-age=300, stale-while-revalidate=3600
+
+/blogs/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+/blogs/how-to-make-a-girl-miss-you-preview.jpg
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/blogs/relationship-trust-featured.jpg
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/blogs/relationship-trust-featured.webp
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/blogs/romantic-girlfriend-featured.jpg
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/blogs/romantic-girlfriend-featured.webp
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/og-default.jpg
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex

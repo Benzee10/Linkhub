@@ -1,3 +1,10 @@
+import { CONFIG } from '../src/config';
+import {
+  DirectoryPostDetail,
+  renderDirectoryPostContentHtml,
+  renderGroupCardHtml,
+  sanitizeUrl,
+} from '../src/post-renderer';
 import {
   getRemoteSocialPreviewSource,
   resolveBlogPostPreviewImage,
@@ -16,7 +23,7 @@ export interface PagesMiddlewareContext {
   };
 }
 
-interface SocialMetaPayload {
+export interface SocialMetaPayload {
   documentTitle: string;
   title: string;
   description: string;
@@ -24,7 +31,12 @@ interface SocialMetaPayload {
   imageWidth: number;
   imageHeight: number;
   pageUrl: string;
+  canonicalUrl?: string;
+  jsonLd?: string;
 }
+
+const MAX_UPSTREAM_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB cap to protect Worker memory
+const UPSTREAM_FETCH_TIMEOUT_MS = 5000;
 
 function escapeAttr(value: string): string {
   return value
@@ -48,16 +60,25 @@ function upsertTag(html: string, pattern: RegExp, replacement: string): string {
   return html.replace('</head>', `    ${replacement}\n  </head>`);
 }
 
+function resolveMimeType(imageUrl: string): string {
+  const lower = imageUrl.toLowerCase();
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  return 'image/jpeg';
+}
+
 export function injectSocialMetaIntoHtml(html: string, meta: SocialMetaPayload): string {
   const titleAttr = escapeAttr(meta.title);
   const descAttr = escapeAttr(meta.description);
   const imgAttr = escapeAttr(meta.imageUrl);
   const urlAttr = escapeAttr(meta.pageUrl);
-  const mimeType = meta.imageUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+  const canonicalAttr = escapeAttr(meta.canonicalUrl || meta.pageUrl);
+  const mimeType = resolveMimeType(meta.imageUrl);
 
   let result = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(meta.documentTitle)}</title>`);
 
   result = upsertTag(result, /<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${descAttr}" />`);
+  result = upsertTag(result, /<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canonicalAttr}" />`);
   result = upsertTag(result, /<meta\s+property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${titleAttr}" />`);
   result = upsertTag(result, /<meta\s+property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${descAttr}" />`);
   result = upsertTag(result, /<meta\s+property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${urlAttr}" />`);
@@ -78,6 +99,70 @@ export function injectSocialMetaIntoHtml(html: string, meta: SocialMetaPayload):
   result = upsertTag(result, /<meta\s+itemprop=["']image["'][^>]*>/i, `<meta itemprop="image" content="${imgAttr}" />`);
   result = upsertTag(result, /<link\s+rel=["']image_src["'][^>]*>/i, `<link rel="image_src" href="${imgAttr}" />`);
 
+  if (meta.jsonLd) {
+    result = upsertTag(
+      result,
+      /<script\s+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/i,
+      `<script type="application/ld+json">${meta.jsonLd}</script>`,
+    );
+  }
+
+  return result;
+}
+
+export function prerenderDirectoryPostBodyIntoHtml(
+  html: string,
+  post: DirectoryPostDetail,
+  joinRedirectLink: string,
+): string {
+  const safeCategory = escapeHtml(post.category || 'Community');
+  const safeTitle = escapeHtml(post.title);
+  const safeDesc = escapeHtml(post.description);
+  const safeIntro = escapeHtml(post.intro || '');
+  const safeHeroSrc = escapeAttr(sanitizeUrl(post.image, '/og-default.jpg'));
+  const groups = Array.isArray(post.groups) ? post.groups : [];
+  const groupCountText = `${groups.length} Groups Available`;
+  const groupsHtml = groups.map(g => renderGroupCardHtml(g, joinRedirectLink)).join('\n');
+  const contentHtml = renderDirectoryPostContentHtml(post.content || '');
+
+  let result = html.replace(
+    /<header id="post-header"([^>]*)>/i,
+    `<header id="post-header"$1 data-prerendered-id="${escapeAttr(post.id)}">`,
+  );
+
+  result = result.replace(
+    /(<div id="post-category"[^>]*>)[\s\S]*?(<\/div>)/i,
+    `$1${safeCategory}$2`,
+  );
+  result = result.replace(
+    /(<h1 id="post-title"[^>]*>)[\s\S]*?(<\/h1>)/i,
+    `$1${safeTitle}$2`,
+  );
+  result = result.replace(
+    /(<p id="post-description"[^>]*>)[\s\S]*?(<\/p>)/i,
+    `$1${safeDesc}$2`,
+  );
+  result = result.replace(
+    /<img id="post-image"[^>]*>/i,
+    `<img id="post-image" src="${safeHeroSrc}" alt="${escapeAttr(post.title)}" width="896" height="504" fetchpriority="high" decoding="async" class="w-full h-full object-cover" referrerpolicy="no-referrer" />`,
+  );
+  result = result.replace(
+    /(<div id="post-intro"[^>]*>)[\s\S]*?(<\/div>)/i,
+    `$1${safeIntro}$2`,
+  );
+  result = result.replace(
+    /(<div id="post-content"[^>]*>)[\s\S]*?(<\/div>)/i,
+    `$1${contentHtml}$2`,
+  );
+  result = result.replace(
+    /(<span id="group-count"[^>]*>)[\s\S]*?(<\/span>)/i,
+    `$1${escapeHtml(groupCountText)}$2`,
+  );
+  result = result.replace(
+    /<!-- GROUPS_LIST_START -->[\s\S]*?<!-- GROUPS_LIST_END -->/,
+    groupsHtml,
+  );
+
   return result;
 }
 
@@ -86,6 +171,68 @@ function resolveAbsoluteUrl(rawUrl: string, origin: string): string {
     return rawUrl;
   }
   return new URL(rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`, origin).href;
+}
+
+function isSafePublicHttpUrl(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host.endsWith('.local') ||
+      host === '[::1]' ||
+      /^127\./.test(host) ||
+      /^10\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^169\.254\./.test(host) ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+    ) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function readBoundedBytes(response: Response, maxBytes: number): Promise<Uint8Array | null> {
+  const declaredLen = Number(response.headers.get('content-length') || '0');
+  if (declaredLen > maxBytes) return null;
+
+  if (!response.body) {
+    const buf = new Uint8Array(await response.arrayBuffer());
+    return buf.byteLength <= maxBytes ? buf : null;
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        total += value.byteLength;
+        if (total > maxBytes) {
+          await reader.cancel();
+          return null;
+        }
+        chunks.push(value);
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
 }
 
 function detectImageMime(bytes: Uint8Array): string | null {
@@ -121,8 +268,12 @@ async function proxyRemoteSocialImage(
     candidates.push(fallbackUrl);
   }
 
-  for (let i = 0; i < candidates.length; i++) {
+  for (let i = 0; i < candidates.length && i < 4; i++) {
     const candidate = candidates[i];
+    if (!isSafePublicHttpUrl(candidate)) continue;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
     try {
       const upstream = await fetch(candidate, {
         headers: {
@@ -132,10 +283,13 @@ async function proxyRemoteSocialImage(
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
         },
         redirect: 'follow',
+        signal: controller.signal,
       });
       if (!upstream.ok) continue;
 
-      const bytes = new Uint8Array(await upstream.arrayBuffer());
+      const bytes = await readBoundedBytes(upstream, MAX_UPSTREAM_IMAGE_BYTES);
+      if (!bytes) continue;
+
       const mime = detectImageMime(bytes);
       if (mime) {
         return new Response(method === 'HEAD' ? null : bytes, {
@@ -161,6 +315,8 @@ async function proxyRemoteSocialImage(
       }
     } catch {
       // Try next candidate
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -217,6 +373,30 @@ async function handlePreviewImageRequest(
   return staticRes;
 }
 
+function buildDirectoryJsonLd(
+  title: string,
+  description: string,
+  canonicalUrl: string,
+  groupsCount: number,
+): string {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: canonicalUrl,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'LinkHub',
+      url: CONFIG.SITE_ORIGIN,
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: groupsCount,
+    },
+  }).replaceAll('<', '\\u003c');
+}
+
 export async function onRequest(context: PagesMiddlewareContext): Promise<Response> {
   const { request, env } = context;
   if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -264,7 +444,7 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
       return response;
     }
 
-    const data = await dataRes.json() as Record<string, unknown>;
+    const data = (await dataRes.json()) as Record<string, unknown>;
     const title = typeof data.title === 'string' ? data.title : '';
     if (!title) {
       return response;
@@ -284,17 +464,24 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
       return response;
     }
 
+    const canonicalOrigin = CONFIG.SITE_ORIGIN.replace(/\/+$/, '');
     const description = isBlogPost
       ? String(data.description || data.excerpt || '')
       : String(data.description || '');
-    const pageUrl = isBlogPost && typeof data.url === 'string' && data.url
-      ? resolveAbsoluteUrl(data.url, url.origin)
-      : url.href;
+    const pageUrl =
+      isBlogPost && typeof data.url === 'string' && data.url
+        ? resolveAbsoluteUrl(data.url, url.origin)
+        : url.href;
+    const canonicalUrl = isBlogPost
+      ? resolveAbsoluteUrl(typeof data.url === 'string' && data.url ? data.url : `/${id}`, canonicalOrigin)
+      : `${canonicalOrigin}/post?id=${encodeURIComponent(id)}`;
     const imageWidth = typeof data.socialPreviewImageWidth === 'number' ? data.socialPreviewImageWidth : 1200;
     const imageHeight = typeof data.socialPreviewImageHeight === 'number' ? data.socialPreviewImageHeight : 630;
 
     const html = await response.text();
-    const updatedHtml = injectSocialMetaIntoHtml(html, {
+    const groupsCount = Array.isArray(data.groups) ? data.groups.length : 0;
+
+    let updatedHtml = injectSocialMetaIntoHtml(html, {
       documentTitle: isBlogPost ? `${title} | LinkHub Blog` : `${title} | LinkHub`,
       title,
       description,
@@ -302,11 +489,26 @@ export async function onRequest(context: PagesMiddlewareContext): Promise<Respon
       imageWidth,
       imageHeight,
       pageUrl,
+      canonicalUrl,
+      jsonLd: isDirectoryPost
+        ? buildDirectoryJsonLd(title, description, canonicalUrl, groupsCount)
+        : undefined,
     });
+
+    if (isDirectoryPost) {
+      updatedHtml = prerenderDirectoryPostBodyIntoHtml(
+        updatedHtml,
+        data as unknown as DirectoryPostDetail,
+        CONFIG.JOIN_REDIRECT_LINK,
+      );
+    }
 
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     headers.delete('etag');
+    if (!headers.has('cache-control')) {
+      headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+    }
 
     return new Response(request.method === 'HEAD' ? null : updatedHtml, {
       status: response.status,

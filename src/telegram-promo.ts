@@ -1,14 +1,19 @@
 import './telegram-promo.css';
 import {
   getTelegramPromoImageQueue,
+  isTelegramPromoDue,
   reserveTelegramPromo,
   TELEGRAM_INVITE_URL,
   TELEGRAM_PROMO_STORAGE_KEY,
 } from './telegram-promo-logic';
 
 const DIALOG_ID = 'telegram-daily-promo';
+const MIN_DELAY_MS = 8000;
+const SCROLL_THRESHOLD_PX = 120;
 
-function showTelegramPromo() {
+let initialized = false;
+
+function showTelegramPromo(): void {
   if (!document.body || document.getElementById(DIALOG_ID)) return;
 
   const dialog = document.createElement('dialog');
@@ -40,13 +45,13 @@ function showTelegramPromo() {
         </button>
       </div>
       <div class="telegram-promo__media">
-        <a class="telegram-promo__image-link" href="${TELEGRAM_INVITE_URL}" aria-label="Open the Telegram invitation">
-          <img class="telegram-promo__image" alt="Telegram community invitation" referrerpolicy="no-referrer" decoding="async" />
+        <a class="telegram-promo__image-link" href="${TELEGRAM_INVITE_URL}" target="_blank" rel="noopener noreferrer" aria-label="Open the Telegram invitation">
+          <img class="telegram-promo__image" alt="Telegram community invitation" loading="lazy" referrerpolicy="no-referrer" decoding="async" />
           <span class="telegram-promo__fallback" hidden>Join our community on Telegram.</span>
         </a>
       </div>
       <div class="telegram-promo__footer">
-        <a class="telegram-promo__button" href="${TELEGRAM_INVITE_URL}">
+        <a class="telegram-promo__button" href="${TELEGRAM_INVITE_URL}" target="_blank" rel="noopener noreferrer">
           <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M21.6 3.1 2.9 10.3c-1.3.5-1.3 1.2-.2 1.5l4.8 1.5 1.8 5.5c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.3-2.3 4.8 3.5c.9.5 1.5.2 1.7-.9l3.1-14.6c.3-1.4-.6-2-1.4-1.7ZM9.3 13l9.4-5.9c.5-.3.9-.1.5.2l-7.8 7.1-.3 3.2L9.3 13Z" />
           </svg>
@@ -96,20 +101,53 @@ function showTelegramPromo() {
     document.body.classList.add('telegram-promo-open');
   } catch {
     dialog.remove();
-    // If the dialog could not be shown, let a later visit try again.
     try {
       if (storage.getItem(TELEGRAM_PROMO_STORAGE_KEY) === String(now)) {
         storage.removeItem(TELEGRAM_PROMO_STORAGE_KEY);
       }
     } catch {
-      // Storage can become unavailable between the read and write.
+      // Storage can become unavailable between read and write.
     }
   }
 }
 
-export function initTelegramPromo() {
+function scheduleDeferredPromo(): void {
+  // Fast exit without listeners/timers if storage is blocked or 24h cooldown is still active
+  try {
+    const lastShown = window.localStorage.getItem(TELEGRAM_PROMO_STORAGE_KEY);
+    if (!isTelegramPromoDue(lastShown, Date.now())) return;
+  } catch {
+    return;
+  }
+
+  let triggered = false;
+  let timerId = 0;
+
+  const triggerOnce = () => {
+    if (triggered) return;
+    triggered = true;
+    window.removeEventListener('scroll', onScroll);
+    if (timerId) window.clearTimeout(timerId);
+    showTelegramPromo();
+  };
+
+  const onScroll = () => {
+    if (window.scrollY >= SCROLL_THRESHOLD_PX) {
+      triggerOnce();
+    }
+  };
+
+  // Defer modal presentation until user scrolls past hero or 8s idle so LCP and Googlebot mobile UX stay clean
+  window.addEventListener('scroll', onScroll, { passive: true });
+  timerId = window.setTimeout(triggerOnce, MIN_DELAY_MS);
+}
+
+export function initTelegramPromo(): void {
+  if (initialized) return;
+  initialized = true;
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTelegramPromo, { once: true });
+    document.addEventListener('DOMContentLoaded', scheduleDeferredPromo, { once: true });
     return;
   }
 
@@ -117,12 +155,12 @@ export function initTelegramPromo() {
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
         document.removeEventListener('visibilitychange', onVisible);
-        showTelegramPromo();
+        scheduleDeferredPromo();
       }
     };
     document.addEventListener('visibilitychange', onVisible);
     return;
   }
 
-  showTelegramPromo();
+  scheduleDeferredPromo();
 }

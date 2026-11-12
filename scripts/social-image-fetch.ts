@@ -1,6 +1,12 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { injectSocialMetaIntoHtml } from '../functions/_middleware';
+import {
+  injectSocialMetaIntoHtml,
+  prerenderDirectoryPostBodyIntoHtml,
+} from '../functions/_middleware';
+import { CONFIG } from '../src/config';
+import { DirectoryPostDetail } from '../src/post-renderer';
 import {
   getRemoteSocialPreviewSource,
   resolveDirectoryPostPreviewImage,
@@ -11,6 +17,8 @@ export interface ImageDimensions {
   height: number;
   mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
 }
+
+const BUILD_FETCH_CONCURRENCY = 6;
 
 export function detectImageMetadata(bytes: Uint8Array): ImageDimensions | null {
   if (bytes.length < 24) return null;
@@ -98,7 +106,7 @@ export function detectImageMetadata(bytes: Uint8Array): ImageDimensions | null {
 export async function fetchVerifiedImageBytes(
   primaryUrl: string,
   fallbackUrl?: string,
-  timeoutMs = 12000,
+  timeoutMs = 8000,
 ): Promise<{ bytes: Uint8Array; meta: ImageDimensions } | null> {
   const candidates: string[] = [primaryUrl];
   if (fallbackUrl && !candidates.includes(fallbackUrl)) {
@@ -107,7 +115,7 @@ export async function fetchVerifiedImageBytes(
 
   let referer = 'https://postimg.cc/';
 
-  for (let i = 0; i < candidates.length; i++) {
+  for (let i = 0; i < candidates.length && i < 4; i++) {
     const candidate = candidates[i];
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -134,7 +142,6 @@ export async function fetchVerifiedImageBytes(
         return { bytes: buffer, meta };
       }
 
-      // If an image host (e.g. Postimages) returned an HTML viewer page, extract any ?dl=1 direct download link
       const contentType = response.headers.get('content-type') || '';
       if (contentType.includes('text/html')) {
         const html = new TextDecoder().decode(buffer);
@@ -156,16 +163,43 @@ export async function fetchVerifiedImageBytes(
   return null;
 }
 
-interface DirectoryPostRecord {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  socialPreviewImage?: string;
-  socialPreviewImageSource?: string;
-  socialPreviewImageFallback?: string;
-  socialPreviewImageWidth?: number;
-  socialPreviewImageHeight?: number;
+async function fetchCachedOrRemoteImage(
+  cacheDir: string,
+  remoteSource: string,
+  fallbackUrl?: string,
+): Promise<{ bytes: Uint8Array; meta: ImageDimensions } | null> {
+  const cacheKey = crypto.createHash('sha256').update(remoteSource).digest('hex').slice(0, 24);
+  const cachedPath = path.join(cacheDir, `${cacheKey}.bin`);
+
+  if (fs.existsSync(cachedPath)) {
+    const cachedBytes = new Uint8Array(fs.readFileSync(cachedPath));
+    const meta = detectImageMetadata(cachedBytes);
+    if (meta) {
+      return { bytes: cachedBytes, meta };
+    }
+  }
+
+  const fetched = await fetchVerifiedImageBytes(remoteSource, fallbackUrl);
+  if (fetched) {
+    fs.mkdirSync(cacheDir, { recursive: true });
+    fs.writeFileSync(cachedPath, fetched.bytes);
+  }
+  return fetched;
+}
+
+async function runWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (cursor < items.length) {
+      const idx = cursor++;
+      await worker(items[idx]);
+    }
+  });
+  await Promise.all(runners);
 }
 
 export async function buildDirectoryPostSocialPreviews(
@@ -178,26 +212,36 @@ export async function buildDirectoryPostSocialPreviews(
   if (!fs.existsSync(postsDir) || !fs.existsSync(postTemplatePath)) return;
 
   const postTemplateHtml = fs.readFileSync(postTemplatePath, 'utf-8');
+  const cacheDir = path.join(rootDir, '.cache', 'social-previews');
+  const emitVercelStaticRewrites = process.env.VERCEL === '1';
   const files = fs.readdirSync(postsDir).filter(f => f.endsWith('.json') && f !== 'index.json');
 
-  for (const file of files) {
+  // Deduplicate identical remote URLs in-memory so duplicate preview links only download once
+  const inflightByUrl = new Map<string, Promise<{ bytes: Uint8Array; meta: ImageDimensions } | null>>();
+
+  await runWithConcurrency(files, BUILD_FETCH_CONCURRENCY, async file => {
     const srcJsonPath = path.join(postsDir, file);
-    const data = JSON.parse(fs.readFileSync(srcJsonPath, 'utf-8')) as DirectoryPostRecord;
+    const data = JSON.parse(fs.readFileSync(srcJsonPath, 'utf-8')) as DirectoryPostDetail;
 
     let width = data.socialPreviewImageWidth || 1200;
     let height = data.socialPreviewImageHeight || 630;
     const remoteSource = getRemoteSocialPreviewSource(data);
     const resolvedPreview = resolveDirectoryPostPreviewImage(data);
 
-    // If a remote preview URL is configured (e.g. "https://i.postimg.cc/..."), download it into dist/preview/<id>.jpg
     if (remoteSource && resolvedPreview.startsWith('/')) {
-      const targetAssetPath = path.join(distDir, resolvedPreview.replace(/^\/+/, ''));
-      const fetched = await fetchVerifiedImageBytes(
-        remoteSource,
-        data.socialPreviewImageFallback,
-      );
+      let fetchPromise = inflightByUrl.get(remoteSource);
+      if (!fetchPromise) {
+        fetchPromise = fetchCachedOrRemoteImage(
+          cacheDir,
+          remoteSource,
+          data.socialPreviewImageFallback,
+        );
+        inflightByUrl.set(remoteSource, fetchPromise);
+      }
 
+      const fetched = await fetchPromise;
       if (fetched) {
+        const targetAssetPath = path.join(distDir, resolvedPreview.replace(/^\/+/, ''));
         fs.mkdirSync(path.dirname(targetAssetPath), { recursive: true });
         fs.writeFileSync(targetAssetPath, fetched.bytes);
         width = fetched.meta.width;
@@ -205,7 +249,7 @@ export async function buildDirectoryPostSocialPreviews(
 
         const distPostJsonPath = path.join(distDir, 'posts', file);
         if (fs.existsSync(distPostJsonPath)) {
-          const updatedData: DirectoryPostRecord = {
+          const updatedData: DirectoryPostDetail = {
             ...data,
             socialPreviewImage: resolvedPreview,
             socialPreviewImageSource: remoteSource,
@@ -217,21 +261,29 @@ export async function buildDirectoryPostSocialPreviews(
       }
     }
 
-    const absolutePreviewUrl = resolvedPreview.startsWith('http')
-      ? resolvedPreview
-      : `${productionOrigin}${resolvedPreview.startsWith('/') ? resolvedPreview : `/${resolvedPreview}`}`;
-    const pageUrl = `${productionOrigin}/post.html?id=${encodeURIComponent(data.id)}`;
+    if (emitVercelStaticRewrites) {
+      const absolutePreviewUrl = resolvedPreview.startsWith('http')
+        ? resolvedPreview
+        : `${productionOrigin}${resolvedPreview.startsWith('/') ? resolvedPreview : `/${resolvedPreview}`}`;
+      const canonicalUrl = `${productionOrigin}/post?id=${encodeURIComponent(data.id)}`;
 
-    const prerenderedPostHtml = injectSocialMetaIntoHtml(postTemplateHtml, {
-      documentTitle: `${data.title} | LinkHub`,
-      title: data.title,
-      description: data.description,
-      imageUrl: absolutePreviewUrl,
-      imageWidth: width,
-      imageHeight: height,
-      pageUrl,
-    });
+      let prerenderedPostHtml = injectSocialMetaIntoHtml(postTemplateHtml, {
+        documentTitle: `${data.title} | LinkHub`,
+        title: data.title,
+        description: data.description,
+        imageUrl: absolutePreviewUrl,
+        imageWidth: width,
+        imageHeight: height,
+        pageUrl: canonicalUrl,
+        canonicalUrl,
+      });
+      prerenderedPostHtml = prerenderDirectoryPostBodyIntoHtml(
+        prerenderedPostHtml,
+        data,
+        CONFIG.JOIN_REDIRECT_LINK,
+      );
 
-    fs.writeFileSync(path.join(distDir, `post-${data.id}.html`), prerenderedPostHtml, 'utf-8');
-  }
+      fs.writeFileSync(path.join(distDir, `post-${data.id}.html`), prerenderedPostHtml, 'utf-8');
+    }
+  });
 }

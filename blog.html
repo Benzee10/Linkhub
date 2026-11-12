@@ -3,30 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blog & Community Guides | LinkHub</title>
+    <title>Blog &amp; Community Guides | LinkHub</title>
     <meta name="description" content="Discover actionable tips, community safety guides, and advice for joining active WhatsApp groups on LinkHub." />
+    <link rel="canonical" href="%LINKHUB_ORIGIN%/blog" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="%LINKHUB_ORIGIN%/blog.html" />
+    <meta property="og:url" content="%LINKHUB_ORIGIN%/blog" />
     <meta property="og:site_name" content="LinkHub" />
-    <meta property="og:title" content="Blog & Community Guides | LinkHub" />
+    <meta property="og:title" content="Blog &amp; Community Guides | LinkHub" />
     <meta property="og:description" content="Discover actionable tips, community safety guides, and advice for joining active WhatsApp groups on LinkHub." />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=80" />
+    <meta property="og:image" content="%LINKHUB_ORIGIN%/og-default.jpg" />
+    <meta property="og:image:secure_url" content="%LINKHUB_ORIGIN%/og-default.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="%LINKHUB_ORIGIN%/blog.html" />
-    <meta property="twitter:title" content="Blog & Community Guides | LinkHub" />
-    <meta property="twitter:description" content="Discover actionable tips, community safety guides, and advice for joining active WhatsApp groups on LinkHub." />
-    <meta property="twitter:image" content="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=80" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="%LINKHUB_ORIGIN%/blog" />
+    <meta name="twitter:title" content="Blog &amp; Community Guides | LinkHub" />
+    <meta name="twitter:description" content="Discover actionable tips, community safety guides, and advice for joining active WhatsApp groups on LinkHub." />
+    <meta name="twitter:image" content="%LINKHUB_ORIGIN%/og-default.jpg" />
 
-    <!-- Popunder script -->
-    <script data-cfasync="false" src="https://capitalhospitals.org/1/dd1f99af547837b6e460ed5c5e63c395"></script>
+    <!-- Non-blocking Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      />
+    </noscript>
 
-    <!-- Social bar script -->
-    <script data-cfasync="false" src="https://brijmohan.org/14/93d4395e16d63df09cc22caf7707ab97"></script>
+    <!-- Prevent Dark Mode FOUC -->
+    <script>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme:dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-H0H97SH5HQ"></script>
@@ -37,88 +60,81 @@
       gtag('config', 'G-H0H97SH5HQ');
     </script>
   </head>
-  <body class="bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg transition-colors duration-300">
+  <body class="bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-100 selection:text-emerald-900 grid-bg transition-colors duration-200">
     <!-- Navigation -->
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50">
+    <nav class="sticky top-0 z-50 glass-nav">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 sm:h-20 items-center">
           <a href="/" class="flex items-center gap-2.5 sm:gap-3 group">
             <div class="w-9 h-9 sm:w-10 sm:h-10 bg-slate-900 dark:bg-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200 dark:shadow-none group-hover:bg-emerald-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             </div>
             <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white font-display">LinkHub</span>
           </a>
-          <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-500">
+          <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600 dark:text-slate-400">
             <a href="/" class="hover:text-slate-900 dark:hover:text-white transition-colors">Discover</a>
             <a href="/#posts-grid" class="hover:text-slate-900 dark:hover:text-white transition-colors">Categories</a>
-            <a href="/blog.html" class="text-slate-900 dark:text-emerald-400 font-bold">Blog</a>
-            <button id="theme-toggle" aria-label="Toggle theme" class="min-w-[44px] min-h-[44px] p-2.5 sm:p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center">
-              <svg id="sun-icon" class="hidden dark:block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-              <svg id="moon-icon" class="block dark:hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            <a href="/blog" class="text-slate-900 dark:text-emerald-400 font-bold">Blog</a>
+            <button id="theme-toggle" type="button" aria-label="Toggle theme" class="min-w-[44px] min-h-[44px] p-2.5 sm:p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+              <svg id="sun-icon" class="hidden dark:block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <svg id="moon-icon" class="block dark:hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
             </button>
-            <a href="/" class="bg-slate-900 dark:bg-emerald-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all shadow-xl shadow-slate-200 dark:shadow-none min-h-[44px] flex items-center">Explore Groups</a>
+            <a href="/" class="bg-slate-900 dark:bg-emerald-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-colors shadow-xl shadow-slate-200 dark:shadow-none min-h-[44px] flex items-center">Explore Groups</a>
           </div>
-          <!-- Mobile Hamburger Toggle -->
-          <button id="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false" class="md:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all focus:outline-none flex items-center justify-center">
-            <svg id="hamburger-icon" class="block w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-            <svg id="close-icon" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button id="mobile-menu-btn" type="button" aria-label="Toggle navigation menu" aria-controls="mobile-menu-drawer" aria-expanded="false" class="md:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors focus:outline-none flex items-center justify-center">
+            <svg id="hamburger-icon" class="block w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            <svg id="close-icon" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
+    </nav>
 
-      <!-- Mobile Backdrop Overlay -->
-      <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"></div>
-
-      <!-- Mobile Navigation Drawer -->
-      <div id="mobile-menu-drawer" class="fixed top-0 right-0 bottom-0 w-72 sm:w-80 max-w-[85vw] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col justify-between p-5 sm:p-6 pb-safe">
+    <!-- Mobile Navigation (outside backdrop-blur nav so fixed drawer covers full viewport on Android/iOS) -->
+    <div class="fixed inset-0 z-[60] overflow-hidden pointer-events-none md:hidden">
+      <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+      <div id="mobile-menu-drawer" class="fixed top-0 right-0 bottom-0 w-72 sm:w-80 max-w-[85vw] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 sm:p-6 pb-safe pointer-events-auto">
         <div>
-          <!-- Drawer Header -->
           <div class="flex items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 bg-slate-900 dark:bg-emerald-600 rounded-xl flex items-center justify-center text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               </div>
               <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white font-display">Menu</span>
             </div>
-            <button id="mobile-menu-close" aria-label="Close menu" class="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button id="mobile-menu-close" type="button" aria-label="Close menu" class="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
-
-          <!-- Drawer Navigation Links -->
           <div class="py-5 space-y-1.5">
             <a href="/" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 font-semibold min-h-[48px] hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
               <span>Discover</span>
             </a>
             <a href="/#posts-grid" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-300 font-semibold min-h-[48px] hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
               <span>Categories</span>
             </a>
-            <a href="/blog.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold min-h-[48px] transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
-              <span>Blog & Articles</span>
+            <a href="/blog" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold min-h-[48px] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+              <span>Blog &amp; Articles</span>
             </a>
           </div>
         </div>
-
-        <!-- Drawer Footer Controls -->
         <div class="pt-5 border-t border-slate-100 dark:border-slate-800 space-y-3">
           <div class="flex items-center justify-between px-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Appearance</span>
-            <button id="mobile-theme-toggle" aria-label="Toggle dark mode" class="min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
-              <svg class="hidden dark:block w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-              <svg class="block dark:hidden w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Appearance</span>
+            <button id="mobile-theme-toggle" type="button" aria-label="Toggle dark mode" class="min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+              <svg class="hidden dark:block w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <svg class="block dark:hidden w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
             </button>
           </div>
-          <a href="/" class="w-full min-h-[48px] flex items-center justify-center gap-2 bg-slate-900 dark:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all text-sm active:scale-[0.98]">
+          <a href="/" class="w-full min-h-[48px] flex items-center justify-center gap-2 bg-slate-900 dark:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-colors text-sm active:scale-[0.98]">
             <span>Explore All Groups</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
         </div>
       </div>
-    </nav>
+    </div>
 
     <!-- Blog Header -->
     <header class="relative pt-10 pb-12 sm:pt-20 sm:pb-20 lg:pt-32 lg:pb-28">
@@ -127,12 +143,12 @@
           <span class="relative flex h-2 w-2">
             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          LinkHub Blog & Guides
+          LinkHub Blog &amp; Guides
         </div>
         <h1 class="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 sm:mb-6 font-display leading-[1.1] text-balance">
-          Insights & <span class="text-transparent bg-clip-text bg-gradient-to-br from-emerald-500 to-teal-600">Guides</span>
+          Insights &amp; <span class="text-transparent bg-clip-text bg-gradient-to-br from-emerald-500 to-teal-600">Guides</span>
         </h1>
-        <p class="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 leading-relaxed px-1 sm:px-0">
+        <p class="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 leading-relaxed px-1 sm:px-0">
           Tips, safety guides, and deep dives on how to discover, join, and thrive in genuine WhatsApp communities.
         </p>
       </div>
@@ -140,9 +156,10 @@
 
     <!-- Blog Grid -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pb-32">
+      <h2 class="sr-only">Latest Guides and Articles</h2>
       <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
-        <!-- Skeleton loaders -->
-        <div class="animate-pulse bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 h-[420px]"></div>
+        <!-- BLOG_GRID_START -->
+        <!-- BLOG_GRID_END -->
       </div>
     </main>
 
@@ -153,60 +170,62 @@
           <div class="col-span-1 md:col-span-2">
             <div class="flex items-center gap-2 mb-4 sm:mb-6">
               <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
               </div>
               <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">LinkHub</span>
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base max-w-sm">
-              The world's most trusted directory for niche WhatsApp communities. Join thousands of users discovering new connections every day.
+            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-sm">
+              The trusted directory for curated WhatsApp communities. Join thousands of members discovering active groups every day.
             </p>
           </div>
           <div>
-            <h4 class="font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 text-sm uppercase tracking-wider">Quick Links</h4>
+            <h3 class="font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 text-sm uppercase tracking-wider">Quick Links</h3>
             <ul class="space-y-3 sm:space-y-4 text-sm text-slate-600 dark:text-slate-400">
               <li><a href="/" class="hover:text-emerald-600 transition-colors py-1 inline-block">Home</a></li>
-              <li><a href="/blog.html" class="hover:text-emerald-600 transition-colors py-1 inline-block">Blog & Guides</a></li>
-              <li><a href="/" class="hover:text-emerald-600 transition-colors py-1 inline-block">Explore Communities</a></li>
+              <li><a href="/blog" class="hover:text-emerald-600 transition-colors py-1 inline-block">Blog &amp; Guides</a></li>
+              <li><a href="/#posts-grid" class="hover:text-emerald-600 transition-colors py-1 inline-block">Explore Communities</a></li>
             </ul>
           </div>
           <div>
-            <h4 class="font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 text-sm uppercase tracking-wider">Support</h4>
+            <h3 class="font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 text-sm uppercase tracking-wider">Resources</h3>
             <ul class="space-y-3 sm:space-y-4 text-sm text-slate-600 dark:text-slate-400">
-              <li><a href="/" class="hover:text-emerald-600 transition-colors py-1 inline-block">Help Center</a></li>
-              <li><a href="/" class="hover:text-emerald-600 transition-colors py-1 inline-block">Privacy Policy</a></li>
-              <li><a href="/" class="hover:text-emerald-600 transition-colors py-1 inline-block">Terms of Service</a></li>
+              <li><a href="/how-to-find-and-join-active-whatsapp-groups-safely" class="hover:text-emerald-600 transition-colors py-1 inline-block">WhatsApp Safety Guide</a></li>
+              <li><a href="https://t.me/+5Qe37BSNw941OWE0" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 transition-colors py-1 inline-block">Telegram Community</a></li>
+              <li><a href="/#trending-container" class="hover:text-emerald-600 transition-colors py-1 inline-block">Trending Groups</a></li>
             </ul>
           </div>
         </div>
-        <div class="border-t border-slate-100 dark:border-slate-900 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4 text-xs text-slate-400 text-center md:text-left">
+        <div class="border-t border-slate-100 dark:border-slate-900 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4 text-xs text-slate-500 dark:text-slate-400 text-center md:text-left">
           <p>&copy; 2026 LinkHub Directory. All rights reserved.</p>
-          <p>Made with &hearts; for the community.</p>
+          <p>Curated communities &amp; relationship guides.</p>
         </div>
       </div>
     </footer>
 
     <!-- Mobile Bottom Navigation Bar -->
-    <nav aria-label="Mobile Navigation" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800/80 px-2 py-1.5 pb-safe shadow-2xl">
+    <nav aria-label="Mobile Navigation" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800/80 px-2 py-1.5 pb-safe shadow-2xl">
       <div class="grid grid-cols-4 items-center">
-        <a href="/" class="flex flex-col items-center justify-center py-1 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium min-h-[44px]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <a href="/" class="flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium min-h-[44px]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span class="text-[10px] tracking-tight mt-1">Discover</span>
         </a>
-        <a href="/#trending-container" class="flex flex-col items-center justify-center py-1 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium min-h-[44px]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/><path d="m2 12 20 0"/></svg>
+        <a href="/#trending-container" class="flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium min-h-[44px]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/><path d="m2 12 20 0"/></svg>
           <span class="text-[10px] tracking-tight mt-1">Trending</span>
         </a>
-        <a href="/blog.html" class="flex flex-col items-center justify-center py-1 text-emerald-600 dark:text-emerald-400 font-semibold min-h-[44px]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+        <a href="/blog" class="flex flex-col items-center justify-center py-1 text-emerald-600 dark:text-emerald-400 font-semibold min-h-[44px]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
           <span class="text-[10px] tracking-tight mt-1">Articles</span>
         </a>
-        <a href="/#posts-grid" class="flex flex-col items-center justify-center py-1 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium min-h-[44px]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+        <a href="/#posts-grid" class="flex flex-col items-center justify-center py-1 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium min-h-[44px]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
           <span class="text-[10px] tracking-tight mt-1">Groups</span>
         </a>
       </div>
     </nav>
 
     <script type="module" src="/src/blog.ts"></script>
+    <script data-cfasync="false" async src="https://capitalhospitals.org/1/dd1f99af547837b6e460ed5c5e63c395"></script>
+    <script data-cfasync="false" async src="https://brijmohan.org/14/93d4395e16d63df09cc22caf7707ab97"></script>
   </body>
 </html>

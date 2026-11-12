@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "include": [
+    "/post",
+    "/post.html",
+    "/blog-post",
+    "/blog-post.html",
+    "/preview/*"
+  ],
+  "exclude": []
+}
